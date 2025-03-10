@@ -1,0 +1,140 @@
+import os
+import textwrap
+from PIL import Image, ImageDraw, ImageFont
+from moviepy.editor import VideoFileClip, ImageClip, CompositeVideoClip
+import numpy as np
+
+
+class RedditCommentOverlay:
+    def __init__(self, video_path):
+        """Initialize with the path to the video file."""
+        self.video = VideoFileClip(video_path)
+        self.font_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fonts")
+        self.default_avatar = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "default_avatar.png")
+
+        # Ensure the font directory exists
+        os.makedirs(self.font_dir, exist_ok=True)
+
+        # Create assets directory if it doesn't exist
+        os.makedirs(os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets"), exist_ok=True)
+
+    def create_reddit_comment(self, username, comment_text, avatar_path=None, width=500):
+        """
+        Create a Reddit-style comment image
+
+        Args:
+            username (str): Username to display
+            comment_text (str): The comment content
+            avatar_path (str, optional): Path to avatar image. Uses default if None.
+            width (int): Width of the comment image
+
+        Returns:
+            PIL.Image: The generated comment image
+        """
+        # Set up fonts
+        try:
+            username_font = ImageFont.truetype(os.path.join(self.font_dir, "arial_bold.ttf"), 16)
+            comment_font = ImageFont.truetype(os.path.join(self.font_dir, "arial.ttf"), 14)
+        except IOError:
+            username_font = ImageFont.load_default()
+            comment_font = ImageFont.load_default()
+
+        # Load avatar image
+        avatar_size = 40
+        if avatar_path and os.path.exists(avatar_path):
+            avatar = Image.open(avatar_path)
+        else:
+            # Create a default avatar if none is provided
+            avatar = Image.new('RGB', (avatar_size, avatar_size), color=(200, 200, 200))
+            if os.path.exists(self.default_avatar):
+                avatar = Image.open(self.default_avatar)
+
+        avatar = avatar.resize((avatar_size, avatar_size))
+
+        # Create circular mask for avatar
+        mask = Image.new('L', avatar.size, 0)
+        draw = ImageDraw.Draw(mask)
+        draw.ellipse((0, 0, avatar_size, avatar_size), fill=255)
+        avatar.putalpha(mask)
+
+        # Wrap comment text to fit width
+        padding = 20
+        text_width = width - avatar_size - 3 * padding
+        wrapped_text = textwrap.fill(comment_text, width=int(text_width / 7))
+
+        # Calculate the height based on wrapped text
+        lines = wrapped_text.count('\n') + 1
+        line_height = comment_font.getbbox("Ay")[3] * 1.5
+        text_height = int(lines * line_height)
+
+        # Create the image with dark gray background
+        height = max(avatar_size + 2 * padding, text_height + padding * 2) + 20
+        comment_img = Image.new('RGBA', (width, height), color=(26, 26, 27, 220))
+        draw = ImageDraw.Draw(comment_img)
+
+        # Add avatar
+        comment_img.paste(avatar, (padding, padding), avatar)
+
+        # Add username
+        username_position = (avatar_size + padding * 2, padding)
+        draw.text(username_position, username, font=username_font, fill=(58, 160, 255))
+
+        # Add comment text
+        comment_position = (avatar_size + padding * 2, padding + 25)
+        draw.text(comment_position, wrapped_text, font=comment_font, fill=(215, 218, 220))
+
+        return comment_img
+
+    def add_comments_to_video(self, comments_data, output_path):
+        """
+        Add multiple comments to the video
+
+        Args:
+            comments_data (list): List of dictionaries containing comment data:
+                                 [{'username': 'user1', 'text': 'comment text',
+                                   'avatar': 'path/to/avatar.png', 'start_time': 5, 'duration': 3}]
+            output_path (str): Path where to save the output video
+
+        Returns:
+            str: Path to the output video
+        """
+        video_clips = [self.video]
+
+        for comment in comments_data:
+            # Create comment image
+            comment_img = self.create_reddit_comment(
+                username=comment['username'],
+                comment_text=comment['text'],
+                avatar_path=comment.get('avatar'),
+                width=int(self.video.w * 0.8)  # Make comment 80% of video width
+            )
+
+            # Convert PIL image to numpy array
+            comment_array = np.array(comment_img)
+
+            # Create image clip
+            img_clip = ImageClip(comment_array)
+
+            # Position comment at the bottom of the video
+            position_x = (self.video.w - img_clip.w) // 2  # Center horizontally
+            position_y = (self.video.h - img_clip.h) // 2  # Near bottom with 50px margin
+
+            # Set duration and position
+            img_clip = (img_clip
+                        .set_position((position_x, position_y))
+                        .set_start(comment['start_time'])
+                        .set_duration(comment['duration']))
+
+            video_clips.append(img_clip)
+
+        # Create composite video
+        final_video = CompositeVideoClip(video_clips)
+
+        # Write output
+        final_video.write_videofile(output_path, codec='libx264')
+
+        return output_path
+
+    def close(self):
+        """Close video file and release resources."""
+        self.video.close()
