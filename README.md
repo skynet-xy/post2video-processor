@@ -12,7 +12,7 @@ This tool allows you to overlay Reddit-style comments on existing videos. Each c
 2. Install the required dependencies:
 
 ```bash
-pip install moviepy pillow
+  pip install -r requirements.txt
 ```
 
 3. Download some font files (Arial and Arial Bold) and place them in the `fonts` directory:
@@ -40,7 +40,7 @@ comments = [
 3. Run the script:
 
 ```bash
-python create_video.py
+  python create_video.py
 ```
 
 4. Find the output video in the location specified in the script
