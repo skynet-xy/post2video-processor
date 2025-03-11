@@ -1,12 +1,16 @@
 import os
 import yt_dlp as youtube_dl
+import threading
 from youtube_transcript_api import YouTubeTranscriptApi
 
 def download_youtube_video(url, output_path="."):
     ydl_opts = {
-        'format': 'best',
+        'format': 'bestvideo[height>=480]+bestaudio[ext=m4a]/best[height>=480]',
+        'merge_output_format': 'mp4',
         'outtmpl': os.path.join(output_path, '%(title)s.%(ext)s'),
-        'noplaylist': True
+        'noplaylist': True,
+        'external_downloader': 'aria2c',  # Use aria2c for faster downloads
+        'external_downloader_args': ['-x', '16', '-k', '1M']  # 16 connections, 1M chunk size
     }
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         info_dict = ydl.extract_info(url, download=True)
@@ -26,6 +30,12 @@ def download_and_fetch_transcript(youtube_url, download_dir="download"):
         os.makedirs(download_dir)
 
     print("Downloading video...")
+
+    download_thread = threading.Thread(target=download_youtube_video, args=(youtube_url, download_dir))
+    download_thread.start()
+
+    download_thread.join()
+
     try:
         video_path, info_dict = download_youtube_video(youtube_url, download_dir)
     except Exception as e:
