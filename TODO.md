@@ -13,8 +13,8 @@
   - [x] Output: 1 image of comment (avatar, username, comment, upvote, downvote + may cai nut khac(back,...))
 
 # Text To Speech
-- Input: 1 loat cac reddit comments
-- Output: 1 doan audio
+- [x] Input: 1 loat cac reddit comments
+- [x] Output: 1 doan audio
 ## API
 
 # Transcript
@@ -44,11 +44,21 @@
 ]
 ```
 ## Cong thuc
-- Tinh toan xem la 1 cai comment dai 30 word -> bao nhieu giay
+- [x] Tinh toan xem la 1 cai comment dai 30 word -> bao nhieu giay
 ## Lay tu audio
 - Lay transcript tu audio (Whisper)
 
 # Gop cac thu vao
-- Input: 1 video minecraft parkour, 1 audio, 1 loat anh cac comment, 1 transcription
-- Output: video hoan chinh
+- [x] Input: 1 video minecraft parkour, 1 audio, 1 loat anh cac comment, 1 transcription
+- [x] Output: video hoan chinh
 
+# FastAPI
+- [ ] APi cho front end
+
+# Input
+- User se chuyen vao
+  - Link reddit
+  - Chon template video co san 
+  - Chon voice text-to-speech
+  - Ratio cua output video
+  - Cho chon do dai video 

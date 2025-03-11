@@ -5,7 +5,7 @@ from youtube_transcript_api import YouTubeTranscriptApi
 
 def download_youtube_video(url, output_path="."):
     # ydl_opts = {
-    #     'format': 'bestvideo[height>=240]+bestaudio[ext=m4a]/best[height>=240]',
+    #     'format': 'bestvideo[height>=720]+bestaudio[ext=m4a]/best[height>=720]',
     #     'merge_output_format': 'mp4',
     #     'outtmpl': os.path.join(output_path, '%(title)s.%(ext)s'),
     #     'noplaylist': True,
