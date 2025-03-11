@@ -1,0 +1,20 @@
+stages:
+  - mirror
+
+# Stage to mirror the repository to GitHub
+sync_to_github:
+  stage: mirror
+  script:
+    - git remote add github https://oauth2:${GITHUB_TOKEN}@github.com/skynet-xy/post2video-processor.git
+    - git fetch --all
+    - git branch -a
+    - |
+      for branch in $(git branch -r | grep 'origin/' | grep -v '\->'); do
+        branch_name=$(echo $branch | sed 's/origin\///');
+        git push --force github $branch:refs/heads/$branch_name;
+      done
+    - git push --force --tags github  # Push tags if any
+  only:
+    - branches
+    - tags
+

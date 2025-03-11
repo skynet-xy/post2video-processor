@@ -1,16 +1,16 @@
 # VIDEO
 
-# Crawl reddit comment
-- Username
-- Subreddit
-- Avatar
-- Comment
-- Upvote
-- Downvote
+- [x] Crawl reddit comment
+    - [x] Username
+    - [x] Subreddit
+    - [x] Avatar
+    - [x] Comment
+    - [x] Upvote
+    - [x] Downvote
 
-# Tu may cai crawl nay ra 1 cai anh
-- Input: 1 reddit comment
-- Output: 1 cai anh comment (avatar, username, comment, upvote, downvote + may cai nut khac(back,...))
+- [x] Create an image of comment from the content of comment
+  - [x] Input: 1 reddit comment
+  - [x] Output: 1 image of comment (avatar, username, comment, upvote, downvote + may cai nut khac(back,...))
 
 # Text To Speech
 - Input: 1 loat cac reddit comments
