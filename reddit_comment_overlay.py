@@ -117,7 +117,7 @@ class RedditCommentOverlay:
 
             # Position comment at the bottom of the video
             position_x = (self.video.w - img_clip.w) // 2  # Center horizontally
-            position_y = (self.video.h - img_clip.h) // 2  # Near bottom with 50px margin
+            position_y = (self.video.h - img_clip.h) // 2  # Center vertically
 
             # Set duration and position
             img_clip = (img_clip
