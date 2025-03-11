@@ -1,8 +1,9 @@
 import os
 import textwrap
 from PIL import Image, ImageDraw, ImageFont
-from moviepy.editor import VideoFileClip, ImageClip, CompositeVideoClip
+from moviepy.editor import VideoFileClip, ImageClip, CompositeVideoClip, AudioFileClip
 import numpy as np
+from text_to_speech import generate_audio_from_text
 
 
 class RedditCommentOverlay:
@@ -11,12 +12,12 @@ class RedditCommentOverlay:
         self.video = VideoFileClip(video_path)
         self.font_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fonts")
         self.default_avatar = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "default_avatar.png")
+        self.audio_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "temp_audio")
 
-        # Ensure the font directory exists
+        # Ensure directories exist
         os.makedirs(self.font_dir, exist_ok=True)
-
-        # Create assets directory if it doesn't exist
         os.makedirs(os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets"), exist_ok=True)
+        os.makedirs(self.audio_dir, exist_ok=True)
 
     def create_reddit_comment(self, username, comment_text, avatar_path=None, width=500):
         """
@@ -85,20 +86,47 @@ class RedditCommentOverlay:
 
         return comment_img
 
-    def add_comments_to_video(self, comments_data, output_path):
-        """
-        Add multiple comments to the video
+    def generate_comment_audio(self, comment):
+        """Generate audio for a comment using text-to-speech.
 
         Args:
-            comments_data (list): List of dictionaries containing comment data:
-                                 [{'username': 'user1', 'text': 'comment text',
-                                   'avatar': 'path/to/avatar.png', 'start_time': 5, 'duration': 3}]
+            comment (dict): Comment data including 'text'
+
+        Returns:
+            tuple: (audio_clip, audio_path)
+        """
+        # Create unique filename for the audio
+        audio_filename = os.path.join(self.audio_dir, f"comment_{hash(comment['text'])}.mp3")
+
+        # Generate the audio file
+        audio_path, _ = generate_audio_from_text(
+            text=comment['text'],
+            output_file=audio_filename,
+            speaking_rate=1.0
+        )
+
+        # Create AudioFileClip
+        audio_clip = AudioFileClip(audio_path)
+
+        return audio_clip, audio_path
+
+    def add_comments_to_video(self, comments_data, output_path):
+        """
+        Add multiple comments with audio to the video
+
+        Args:
+            comments_data (list): List of dictionaries containing comment data
             output_path (str): Path where to save the output video
 
         Returns:
             str: Path to the output video
         """
         video_clips = [self.video]
+        audio_clips = []
+
+        # Get original audio if it exists
+        if self.video.audio:
+            audio_clips.append(self.video.audio)
 
         for comment in comments_data:
             # Create comment image
@@ -127,14 +155,36 @@ class RedditCommentOverlay:
 
             video_clips.append(img_clip)
 
+            # Generate and add audio for this comment
+            audio_clip, _ = self.generate_comment_audio(comment)
+            audio_clip = audio_clip.set_start(comment['start_time'])
+            audio_clips.append(audio_clip)
+
         # Create composite video
         final_video = CompositeVideoClip(video_clips)
+
+        # Combine all audio clips
+        if audio_clips:
+            from moviepy.editor import CompositeAudioClip
+            final_audio = CompositeAudioClip(audio_clips)
+            final_video = final_video.set_audio(final_audio)
 
         # Write output
         final_video.write_videofile(output_path, codec='libx264')
 
+        # Clean up temporary audio files
+        self._clean_temp_audio()
+
         return output_path
+
+    def _clean_temp_audio(self):
+        """Clean up temporary audio files"""
+        import shutil
+        if os.path.exists(self.audio_dir):
+            shutil.rmtree(self.audio_dir)
+            os.makedirs(self.audio_dir, exist_ok=True)
 
     def close(self):
         """Close video file and release resources."""
         self.video.close()
+        self._clean_temp_audio()

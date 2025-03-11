@@ -91,7 +91,7 @@ if __name__ == '__main__':
     OUTPUT_DIR = "./output"
     # Path to your input video
     INPUT_VIDEO = get_first_video_in_directory(OUTPUT_DIR)
-    OUTPUT_VIDEO = "output_video.mp4"
+    OUTPUT_VIDEO = OUTPUT_DIR + "/output_video.mp4"
 
     if not INPUT_VIDEO:
         print("No input video found. Please ensure there are videos in the output directory.")
