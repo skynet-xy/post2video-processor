@@ -1,8 +1,10 @@
 import os
 import textwrap
+
+import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 from moviepy.editor import VideoFileClip, ImageClip, CompositeVideoClip, AudioFileClip
-import numpy as np
+
 from text_to_speech import generate_audio_from_text
 
 
@@ -10,16 +12,17 @@ class RedditCommentOverlay:
     def __init__(self, video_path):
         """Initialize with the path to the video file."""
         self.video = VideoFileClip(video_path)
-        self.font_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fonts")
-        self.default_avatar = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "default_avatar.png")
-        self.audio_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "temp_audio")
+        assets_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets")
+        self.font_dir = os.path.join(assets_dir, "fonts")
+        self.default_avatar = os.path.join(assets_dir, "assets", "default_avatar.png")
+        self.audio_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output", "tmp_audio")
 
         # Ensure directories exist
         os.makedirs(self.font_dir, exist_ok=True)
         os.makedirs(os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets"), exist_ok=True)
         os.makedirs(self.audio_dir, exist_ok=True)
 
-    def create_reddit_comment(self, username, comment_text, avatar_path=None, width=500):
+    def _create_reddit_comment(self, username, comment_text, avatar_path=None, width=500):
         """
         Create a Reddit-style comment image
 
@@ -110,16 +113,15 @@ class RedditCommentOverlay:
 
         return audio_clip, audio_path
 
-    def add_comments_to_video(self, comments_data, output_path):
+    def add_comments_to_video(self, comments_data):
         """
         Add multiple comments with audio to the video
 
         Args:
             comments_data (list): List of dictionaries containing comment data
-            output_path (str): Path where to save the output video
 
         Returns:
-            str: Path to the output video
+            CompositeVideoClip: The final video with comments added
         """
         video_clips = [self.video]
         audio_clips = []
@@ -130,7 +132,7 @@ class RedditCommentOverlay:
 
         for comment in comments_data:
             # Create comment image
-            comment_img = self.create_reddit_comment(
+            comment_img = self._create_reddit_comment(
                 username=comment['username'],
                 comment_text=comment['text'],
                 avatar_path=comment.get('avatar'),
@@ -169,8 +171,21 @@ class RedditCommentOverlay:
             final_audio = CompositeAudioClip(audio_clips)
             final_video = final_video.set_audio(final_audio)
 
-        # Write output
-        final_video.write_videofile(output_path, codec='libx264')
+        return final_video
+
+    def write_videofile(self, video, output_path, codec='libx264'):
+        """
+        Write the video to a file and clean up temporary files
+
+        Args:
+            video (CompositeVideoClip): The video to write
+            output_path (str): Path where to save the output video
+            codec (str): Video codec to use
+
+        Returns:
+            str: Path to the output video
+        """
+        video.write_videofile(output_path, codec=codec)
 
         # Clean up temporary audio files
         self._clean_temp_audio()

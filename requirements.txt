@@ -5,3 +5,4 @@ yt-dlp[default]
 opencv-python
 google-cloud-texttospeech
 google-cloud-translate==2.0.1
+setuptools

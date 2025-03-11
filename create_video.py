@@ -27,13 +27,6 @@ def get_first_video_in_directory(directory="./output"):
     return os.path.join(directory, video_files[0])
 
 
-def get_video_length(video_path):
-    clip = VideoFileClip(video_path)
-    duration = clip.duration
-    clip.close()
-    return duration
-
-
 # In the generate_comments function
 def generate_comments():
     # Define comments to overlay on the video
@@ -43,44 +36,44 @@ def generate_comments():
             "text": "This video is hilarious! I can't stop watching it over and over again.",
             "avatar": "assets/avatar1.png",  # Optional, uses default if not provided
         },
-        {
-            "username": "VideoFan42",
-            "text": "I think this deserves to go viral! So clever and well made.",
-            "avatar": "assets/avatar2.png",
-        },
-        {
-            "username": "TechExpert", "text": "The way you edited this is amazing. What software did you use?",
-            "avatar": "assets/avatar2.png",
-        },
-        {
-            "username": "MovieBuff89", "text": "Incredible! This is one of the best videos I've seen in a while.",
-            "avatar": "assets/avatar2.png",
-        },
-        {
-            "username": "GamerPro", "text": "Wow, the editing here is on another level. Great job!",
-            "avatar": "assets/avatar2.png",
-        },
-        {
-            "username": "NatureLover", "text": "Such a beautiful video. The scenes and music are perfect together.",
-            "avatar": "assets/avatar2.png",
-        },
-        {
-            "username": "MusicManiac", "text": "The soundtrack you chose fits perfectly with the visuals. Love it!",
-            "avatar": "assets/avatar2.png",
-        },
-        {
-            "username": "AdventureSeeker", "text": "This video makes me want to go on an adventure! So inspiring.",
-            "avatar": "assets/avatar2.png",
-        },
-        {
-            "username": "FoodieGal",
-            "text": "I can't believe how good this video is. The food shots are mouth-watering.",
-            "avatar": "assets/avatar2.png",
-        },
-        {
-            "username": "FitnessFreak", "text": "This is the motivation I needed today. Keep up the great work!",
-            "avatar": "assets/avatar2.png",
-        }
+        # {
+        #     "username": "VideoFan42",
+        #     "text": "I think this deserves to go viral! So clever and well made.",
+        #     "avatar": "assets/avatar2.png",
+        # },
+        # {
+        #     "username": "TechExpert", "text": "The way you edited this is amazing. What software did you use?",
+        #     "avatar": "assets/avatar2.png",
+        # },
+        # {
+        #     "username": "MovieBuff89", "text": "Incredible! This is one of the best videos I've seen in a while.",
+        #     "avatar": "assets/avatar2.png",
+        # },
+        # {
+        #     "username": "GamerPro", "text": "Wow, the editing here is on another level. Great job!",
+        #     "avatar": "assets/avatar2.png",
+        # },
+        # {
+        #     "username": "NatureLover", "text": "Such a beautiful video. The scenes and music are perfect together.",
+        #     "avatar": "assets/avatar2.png",
+        # },
+        # {
+        #     "username": "MusicManiac", "text": "The soundtrack you chose fits perfectly with the visuals. Love it!",
+        #     "avatar": "assets/avatar2.png",
+        # },
+        # {
+        #     "username": "AdventureSeeker", "text": "This video makes me want to go on an adventure! So inspiring.",
+        #     "avatar": "assets/avatar2.png",
+        # },
+        # {
+        #     "username": "FoodieGal",
+        #     "text": "I can't believe how good this video is. The food shots are mouth-watering.",
+        #     "avatar": "assets/avatar2.png",
+        # },
+        # {
+        #     "username": "FitnessFreak", "text": "This is the motivation I needed today. Keep up the great work!",
+        #     "avatar": "assets/avatar2.png",
+        # }
     ]
 
     total_comments = len(comments)
@@ -125,8 +118,8 @@ if __name__ == '__main__':
     # Create the overlay processor
     overlay = RedditCommentOverlay(INPUT_VIDEO)
     comments = generate_comments()
-    output_path = overlay.add_comments_to_video(comments, OUTPUT_VIDEO)
-
+    video = overlay.add_comments_to_video(comments)
+    output_path = overlay.write_videofile(video, OUTPUT_VIDEO)
     print(f"Video successfully created at: {output_path}")
 
     # Clean up resources
