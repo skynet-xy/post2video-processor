@@ -1,6 +1,5 @@
 import os
-import json
-import re
+
 from google.cloud import texttospeech
 
 
@@ -9,7 +8,7 @@ def generate_audio_from_text(text, output_file="output.mp3",
                              speaking_rate=1.0, pitch=0.0,
                              credentials_path="./keys/capable-shape-452021-u9-06c66c66092c.json"):
     """
-    Convert text to speech using Google Cloud TTS API and generate timestamp transcript
+    Convert text to speech using Google Cloud TTS API
 
     Args:
         text (str): The text to convert to speech
@@ -21,7 +20,7 @@ def generate_audio_from_text(text, output_file="output.mp3",
         credentials_path (str): Path to Google Cloud credentials
 
     Returns:
-        tuple: (path to audio file, transcript with timestamps)
+        tuple: (path to audio file)
     """
     # Set environment variable for credentials
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = credentials_path
@@ -58,79 +57,7 @@ def generate_audio_from_text(text, output_file="output.mp3",
         out.write(response.audio_content)
         print(f"Audio content written to: {output_file}")
 
-    # Generate transcript with timestamps
-    transcript = generate_transcript(text, speaking_rate)
-
-    # Save transcript
-    transcript_file = os.path.splitext(output_file)[0] + "_transcript.json"
-    with open(transcript_file, "w") as f:
-        json.dump(transcript, f, indent=2)
-
-    print(f"Transcript written to: {transcript_file}")
-
-    return output_file, transcript
-
-
-def generate_transcript(text, speaking_rate=1.0):
-    """
-    Generate timestamps for each sentence in the text
-
-    Args:
-        text (str): The input text
-        speaking_rate (float): Speaking rate used for generation
-
-    Returns:
-        list: List of dictionaries with sentence and timestamp
-    """
-    # Split text into sentences
-    sentences = re.split(r'(?<=[.!?])\s+', text)
-    sentences = [s.strip() for s in sentences if s.strip()]
-
-    transcript = []
-    current_time = 0.0
-
-    for sentence in sentences:
-        # Estimate duration based on character count and speaking rate
-        # Approximately 15 characters per second for normal speech
-        char_per_second = 15 * speaking_rate
-        duration = len(sentence) / char_per_second
-
-        # Add some padding between sentences
-        duration += 0.5
-
-        transcript.append({
-            "text": sentence,
-            "start_time": round(current_time, 2),
-            "end_time": round(current_time + duration, 2)
-        })
-
-        current_time += duration
-
-    return transcript
-
-
-def save_transcript_as_srt(transcript, output_file):
-    """Save transcript in SubRip (SRT) format"""
-    with open(output_file, "w") as f:
-        for i, entry in enumerate(transcript, 1):
-            start = format_srt_time(entry["start_time"])
-            end = format_srt_time(entry["end_time"])
-
-            f.write(f"{i}\n")
-            f.write(f"{start} --> {end}\n")
-            f.write(f"{entry['text']}\n\n")
-
-    print(f"SRT file written to: {output_file}")
-
-
-def format_srt_time(seconds):
-    """Convert seconds to SRT time format (HH:MM:SS,mmm)"""
-    hours = int(seconds // 3600)
-    minutes = int((seconds % 3600) // 60)
-    seconds = seconds % 60
-    milliseconds = int((seconds - int(seconds)) * 1000)
-
-    return f"{hours:02d}:{minutes:02d}:{int(seconds):02d},{milliseconds:03d}"
+    return output_file
 
 
 if __name__ == "__main__":
@@ -148,12 +75,7 @@ if __name__ == "__main__":
         "This is the motivation I needed today. Keep up the great work!",
     ]
 
-    # Generate speech with transcript
-    output_file, transcript = generate_audio_from_text(
+    output_file = generate_audio_from_text(
         text=" ".join(text),
         output_file="output/speech.mp3"
     )
-
-    # Save transcript in SRT format (for subtitles)
-    srt_file = os.path.splitext(output_file)[0] + ".srt"
-    save_transcript_as_srt(transcript, srt_file)

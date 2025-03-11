@@ -99,7 +99,7 @@ class RedditCommentOverlay:
         audio_filename = os.path.join(self.audio_dir, f"comment_{hash(comment['text'])}.mp3")
 
         # Generate the audio file
-        audio_path, _ = generate_audio_from_text(
+        audio_path = generate_audio_from_text(
             text=comment['text'],
             output_file=audio_filename,
             speaking_rate=1.0

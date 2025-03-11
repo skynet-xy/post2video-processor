@@ -1,6 +1,10 @@
-from moviepy.editor import VideoFileClip
 import os
+import tempfile
+
+from moviepy.editor import VideoFileClip, AudioFileClip
+
 from reddit_comment_overlay import RedditCommentOverlay
+from text_to_speech import generate_audio_from_text
 
 
 def get_first_video_in_directory(directory="./output"):
@@ -22,6 +26,7 @@ def get_first_video_in_directory(directory="./output"):
     # Return the first video file found
     return os.path.join(directory, video_files[0])
 
+
 def get_video_length(video_path):
     clip = VideoFileClip(video_path)
     duration = clip.duration
@@ -29,23 +34,19 @@ def get_video_length(video_path):
     return duration
 
 
-def calculate_comment_duration(text):
-    # Simple heuristic to calculate duration based on text length
-    return max(3.0, len(text) * 0.1)
-
-
-def generate_comments(video_duration, num_comments=10):
+# In the generate_comments function
+def generate_comments():
     # Define comments to overlay on the video
     comments = [
         {
             "username": "JohnDoe123",
             "text": "This video is hilarious! I can't stop watching it over and over again.",
             "avatar": "assets/avatar1.png",  # Optional, uses default if not provided
-         },
+        },
         {
             "username": "VideoFan42",
             "text": "I think this deserves to go viral! So clever and well made.",
-             "avatar": "assets/avatar2.png",
+            "avatar": "assets/avatar2.png",
         },
         {
             "username": "TechExpert", "text": "The way you edited this is amazing. What software did you use?",
@@ -72,18 +73,42 @@ def generate_comments(video_duration, num_comments=10):
             "avatar": "assets/avatar2.png",
         },
         {
-            "username": "FoodieGal", "text": "I can't believe how good this video is. The food shots are mouth-watering.",
+            "username": "FoodieGal",
+            "text": "I can't believe how good this video is. The food shots are mouth-watering.",
             "avatar": "assets/avatar2.png",
         },
         {
             "username": "FitnessFreak", "text": "This is the motivation I needed today. Keep up the great work!",
             "avatar": "assets/avatar2.png",
-        }]
+        }
+    ]
+
     total_comments = len(comments)
-    interval = video_duration / total_comments
+
+    # Create temp directory for audio files
+    temp_audio_dir = os.path.join(tempfile.gettempdir(), "comment_audio")
+    os.makedirs(temp_audio_dir, exist_ok=True)
+
+    start_time: int = 0
+    sleep_between_comments = 1  # Sleep for 1 second between comments
     for i, comment in enumerate(comments):
-        comment["start_time"] = i * interval
-        comment["duration"] = calculate_comment_duration(comment["text"])
+        comment["start_time"] = start_time
+
+        # Generate audio and get its duration
+        audio_file = generate_audio_from_text(
+            text=comment["text"],
+            output_file=os.path.join(temp_audio_dir, f"comment_{i}.mp3")
+        )
+
+        # Get audio duration using moviepy
+        audio_clip = AudioFileClip(audio_file)
+        comment["duration"] = audio_clip.duration
+        start_time = start_time + comment["duration"] + sleep_between_comments
+        audio_clip.close()
+
+        # Store audio path for later use
+        comment["audio_path"] = audio_file
+
     return comments
 
 
@@ -97,11 +122,9 @@ if __name__ == '__main__':
         print("No input video found. Please ensure there are videos in the output directory.")
         exit(1)
 
-    video_length = get_video_length(INPUT_VIDEO)
-
     # Create the overlay processor
     overlay = RedditCommentOverlay(INPUT_VIDEO)
-    comments = generate_comments(video_length)  # Assuming the video duration is 60 seconds
+    comments = generate_comments()
     output_path = overlay.add_comments_to_video(comments, OUTPUT_VIDEO)
 
     print(f"Video successfully created at: {output_path}")
