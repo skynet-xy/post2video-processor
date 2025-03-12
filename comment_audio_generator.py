@@ -4,18 +4,19 @@ from moviepy.editor import AudioFileClip
 from text_to_speech import generate_audio_from_text
 
 
-def generate_comments_with_duration(comments, target_duration, pause_time=0.5):
+def generate_comments_with_duration(comments, target_duration, pause_time=0.5, allow_exceed_duration=True):
     """
     Generate audio for comments that fit within the target duration using a fixed pause time.
-    Comments that would cause the total duration to exceed the target are dropped.
+    Comments that would cause the total duration to exceed the target are dropped unless allow_exceed_duration is True.
 
     Args:
         comments (list): List of comment dictionaries with 'username', 'text', etc.
         target_duration (float): Target total duration in seconds
         pause_time (float): Fixed pause time between comments in seconds
+        allow_exceed_duration (bool): If True, include all comments even if they exceed target duration
 
     Returns:
-        list: The comments that fit within the duration with added duration, start_time and audio_path fields
+        tuple: (processed_comments, cumulative_duration) - processed comments and their total duration
     """
     # Create a new list to hold comments that fit within the duration
     processed_comments = []
@@ -43,8 +44,8 @@ def generate_comments_with_duration(comments, target_duration, pause_time=0.5):
         if processed_comments:
             new_total += pause_time
 
-        # If adding this comment would exceed the target duration, stop here
-        if new_total > target_duration:
+        # If adding this comment would exceed the target duration and we don't allow exceeding, stop here
+        if new_total > target_duration and not allow_exceed_duration:
             # Clean up unused audio file
             if os.path.exists(audio_file):
                 os.remove(audio_file)
@@ -63,7 +64,6 @@ def generate_comments_with_duration(comments, target_duration, pause_time=0.5):
         cumulative_duration = new_total
 
     return processed_comments, cumulative_duration
-
 
 def save_comments_with_duration(comments, target_duration, output_file=None):
     """
