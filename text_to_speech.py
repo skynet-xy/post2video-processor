@@ -1,10 +1,10 @@
+import hashlib
 import os
 
 from google.cloud import texttospeech
 
 
-def generate_audio_from_text(text, output_file="output.mp3",
-                             language_code="en-US", voice_name="en-US-Standard-D",
+def generate_audio_from_text(text, language_code="en-US", voice_name="en-US-Standard-D",
                              speaking_rate=1.0, pitch=0.0,
                              credentials_path="./keys/capable-shape-452021-u9-06c66c66092c.json"):
     """
@@ -12,7 +12,6 @@ def generate_audio_from_text(text, output_file="output.mp3",
 
     Args:
         text (str): The text to convert to speech
-        output_file (str): Path to save the audio file
         language_code (str): Language code (e.g., 'en-US')
         voice_name (str): Name of the voice to use
         speaking_rate (float): Speed of speech (1.0 is normal)
@@ -20,8 +19,22 @@ def generate_audio_from_text(text, output_file="output.mp3",
         credentials_path (str): Path to Google Cloud credentials
 
     Returns:
-        tuple: (path to audio file)
+        str: Path to audio file
     """
+    # Create a hash based on text and voice parameters
+    content_hash = hashlib.md5(
+        f"{text}_{language_code}_{voice_name}_{speaking_rate}_{pitch}".encode()
+    ).hexdigest()
+
+    output_dir = "cache"
+    os.makedirs(output_dir, exist_ok=True)
+    output_file = os.path.join(output_dir, f"tts_{content_hash}.mp3")
+
+    # Check if file already exists
+    if os.path.exists(output_file):
+        print(f"Using existing audio file: {output_file}")
+        return output_file
+
     # Set environment variable for credentials
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = credentials_path
 
@@ -48,9 +61,6 @@ def generate_audio_from_text(text, output_file="output.mp3",
     response = client.synthesize_speech(
         input=synthesis_input, voice=voice, audio_config=audio_config
     )
-
-    # Create output directory if it doesn't exist
-    os.makedirs(os.path.dirname(output_file) if os.path.dirname(output_file) else ".", exist_ok=True)
 
     # Write the audio file
     with open(output_file, "wb") as out:

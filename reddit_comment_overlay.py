@@ -98,13 +98,10 @@ class RedditCommentOverlay:
         Returns:
             tuple: (audio_clip, audio_path)
         """
-        # Create unique filename for the audio
-        audio_filename = os.path.join(self.audio_dir, f"comment_{hash(comment['text'])}.mp3")
 
         # Generate the audio file
         audio_path = generate_audio_from_text(
             text=comment['text'],
-            output_file=audio_filename,
             speaking_rate=1.0
         )
 
@@ -185,7 +182,15 @@ class RedditCommentOverlay:
         Returns:
             str: Path to the output video
         """
-        video.write_videofile(output_path, codec=codec)
+        # Create cache directory if it doesn't exist
+        cache_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cache")
+        os.makedirs(cache_dir, exist_ok=True)
+
+        # Create path for temporary audio file in cache directory
+        temp_audio_path = os.path.join(cache_dir, f"{os.path.basename(output_path)}TEMP_MPY_wvf_snd.mp3")
+
+        # Use the temp_audiofile parameter to specify where the temp file should go
+        video.write_videofile(output_path, codec=codec, temp_audiofile=temp_audio_path)
 
         # Clean up temporary audio files
         self._clean_temp_audio()
