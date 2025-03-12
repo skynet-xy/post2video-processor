@@ -62,7 +62,7 @@ def generate_comments_with_duration(comments, target_duration, pause_time=0.5):
         # Update the cumulative duration
         cumulative_duration = new_total
 
-    return processed_comments
+    return processed_comments, cumulative_duration
 
 
 def save_comments_with_duration(comments, target_duration, output_file=None):

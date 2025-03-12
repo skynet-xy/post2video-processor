@@ -75,7 +75,8 @@ def generate_comments():
     ]
 
     target_duration = 30.0  # Target duration in seconds
-    return generate_comments_with_duration(comments, target_duration)
+    processed_comments, duration = generate_comments_with_duration(comments, target_duration)
+    return processed_comments
 
 
 if __name__ == '__main__':
