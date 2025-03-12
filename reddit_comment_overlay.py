@@ -110,22 +110,23 @@ class RedditCommentOverlay:
 
         return audio_clip, audio_path
 
-    def add_comments_to_video(self, comments_data):
+    def add_comments_to_video(self, video, comments_data):
         """
         Add multiple comments with audio to the video
 
         Args:
+            video (VideoFileClip): The original video
             comments_data (list): List of dictionaries containing comment data
 
         Returns:
             CompositeVideoClip: The final video with comments added
         """
-        video_clips = [self.video]
+        video_clips = [video]
         audio_clips = []
 
         # Get original audio if it exists
-        if self.video.audio:
-            audio_clips.append(self.video.audio)
+        if video.audio:
+            audio_clips.append(video.audio)
 
         for comment in comments_data:
             # Create comment image
@@ -133,7 +134,7 @@ class RedditCommentOverlay:
                 username=comment['username'],
                 comment_text=comment['text'],
                 avatar_path=comment.get('avatar'),
-                width=int(self.video.w * 0.8)  # Make comment 80% of video width
+                width=int(video.w * 0.8)  # Make comment 80% of video width
             )
 
             # Convert PIL image to numpy array
@@ -143,8 +144,8 @@ class RedditCommentOverlay:
             img_clip = ImageClip(comment_array)
 
             # Position comment at the bottom of the video
-            position_x = (self.video.w - img_clip.w) // 2  # Center horizontally
-            position_y = (self.video.h - img_clip.h) // 2  # Center vertically
+            position_x = (video.w - img_clip.w) // 2  # Center horizontally
+            position_y = (video.h - img_clip.h) // 2  # Center vertically
 
             # Set duration and position
             img_clip = (img_clip
@@ -208,3 +209,24 @@ class RedditCommentOverlay:
         """Close video file and release resources."""
         self.video.close()
         self._clean_temp_audio()
+
+    def trim_video_to_fit_comments(self, video, comments_data):
+        """
+        Trim the video to fit exactly the duration of the comments
+        Args:
+            video (VideoClip): The original video
+            comments_data (list): List of dictionaries containing comment data with timing info
+
+        Returns:
+            VideoClip: The trimmed video
+        """
+        if not comments_data:
+            return video
+
+        # Calculate the total duration needed for all comments
+        last_comment = max(comments_data, key=lambda x: x['start_time'] + x['duration'])
+        total_duration = last_comment['start_time'] + last_comment['duration']
+
+        # Simply trim the video to the required duration
+        print(f"Trimming video to {total_duration} seconds")
+        return video.subclip(0, min(total_duration, self.video.duration))
