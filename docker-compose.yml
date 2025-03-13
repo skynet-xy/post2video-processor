@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: reddit-comment-overlay-service
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./download:/app/download
+      - ./generated:/app/generated
+      - ./assets:/app/assets
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+
+volumes:
+  download:
+  generated:
+  assets:
