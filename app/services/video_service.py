@@ -8,9 +8,9 @@ from fastapi import HTTPException
 from moviepy.editor import VideoFileClip
 
 from app.api.dto.video_dto import Comment, ResponseMessage
+from app.utils.comment_audio_generator import generate_comments_with_duration
 from app.utils.reddit_comment_overlay import add_comments_to_video, write_videofile
 from app.utils.trim_video import trim_video_to_fit_comments
-from create_video import generate_comments
 
 
 class VideoService:
@@ -31,7 +31,8 @@ class VideoService:
         """
         try:
             video = VideoFileClip(video_path)
-            processed_comments = generate_comments()
+            target_duration = 15.0  # Target duration in seconds
+            processed_comments, _ = generate_comments_with_duration(comments, target_duration, allow_exceed_duration=True)
             video = add_comments_to_video(video, processed_comments)
             video = trim_video_to_fit_comments(video, processed_comments)
             output_path = write_videofile(video)
