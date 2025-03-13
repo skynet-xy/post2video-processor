@@ -11,8 +11,7 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Create necessary directories
-RUN mkdir -p fonts generated/output download assets
+COPY run.py .
 
 # Copy requirements first to leverage Docker cache
 COPY requirements.txt .
