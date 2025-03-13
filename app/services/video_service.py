@@ -1,6 +1,7 @@
-# app/services/video_service.py
 import os
-from typing import List
+import random
+import time
+from typing import List, Tuple, Dict, Any
 
 import yt_dlp as youtube_dl
 from fastapi import HTTPException
@@ -48,12 +49,13 @@ class VideoService:
                 detail=f"Error adding comments to video: {str(e)}"
             )
 
-    async def download_youtube_video(self, url: str, highres=False, output_path=None):
+    async def download_youtube_video(self, url: str, highres=False, output_path=None, max_retries=3) -> Tuple[
+        str, Dict[str, Any]]:
         if not output_path:
             output_path = self.output_dir
 
         resolution_tag = 'highres' if highres else 'standard'
-        format = 'bestvideo[height>=720]+bestaudio[ext=m4a]/best[height>=720]' if highres else 'best',
+        format = 'bestvideo[height>=720]+bestaudio[ext=m4a]/best[height>=720]' if highres else 'best'
 
         ydl_opts = {
             'format': format,
@@ -71,7 +73,38 @@ class VideoService:
                 'external_downloader_args': ['-x', '16', '-k', '1M']
             })
 
-        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(url, download=True)
-            video_title = ydl.prepare_filename(info_dict)
-            return video_title, info_dict
+        retry_count = 0
+        last_exception = None
+
+        while retry_count <= max_retries:
+            try:
+                with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+                    info_dict = ydl.extract_info(url, download=True)
+                    video_title = ydl.prepare_filename(info_dict)
+                    return video_title, info_dict
+
+            except youtube_dl.utils.HTTPError as e:
+                if '403' in str(e):
+                    retry_count += 1
+                    if retry_count > max_retries:
+                        last_exception = e
+                        break
+
+                    # Exponential backoff with jitter
+                    sleep_time = (2 ** retry_count) + random.uniform(0, 1)
+                    print(
+                        f"Received 403 error from YouTube. Retrying in {sleep_time:.2f} seconds (attempt {retry_count}/{max_retries})")
+                    time.sleep(sleep_time)
+                else:
+                    # Re-raise if it's not a 403 error
+                    raise
+            except Exception as e:
+                # Re-raise any other exception
+                raise
+
+        # If we exhausted all retries
+        if last_exception:
+            raise HTTPException(
+                status_code=503,
+                detail=f"Failed to download YouTube video after {max_retries} retries: {str(last_exception)}"
+            )
