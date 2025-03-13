@@ -2,6 +2,7 @@
 import os
 from typing import List
 
+import yt_dlp as youtube_dl
 from fastapi import HTTPException
 from moviepy.editor import VideoFileClip
 
@@ -46,3 +47,31 @@ class VideoService:
                 status_code=500,
                 detail=f"Error adding comments to video: {str(e)}"
             )
+
+    async def download_youtube_video(self, url: str, highres=False, output_path=None):
+        if not output_path:
+            output_path = self.output_dir
+
+        resolution_tag = 'highres' if highres else 'standard'
+        format = 'bestvideo[height>=720]+bestaudio[ext=m4a]/best[height>=720]' if highres else 'best',
+
+        ydl_opts = {
+            'format': format,
+            'outtmpl': os.path.join(output_path, f'%(title,sanitize)s-{resolution_tag}-%(id)s.%(ext)s'),
+            'noplaylist': True,
+            'restrictfilenames': True,
+            'trim_file_name': len(output_path) + 64,
+            'overwrites': False,
+        }
+
+        # Add external downloader only for high-res videos
+        if highres:
+            ydl_opts.update({
+                'external_downloader': 'aria2c',
+                'external_downloader_args': ['-x', '16', '-k', '1M']
+            })
+
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            info_dict = ydl.extract_info(url, download=True)
+            video_title = ydl.prepare_filename(info_dict)
+            return video_title, info_dict

@@ -12,5 +12,3 @@ pydantic
 pydantic-settings
 python-dotenv
 python-multipart
-pytest
-pytest-httpx

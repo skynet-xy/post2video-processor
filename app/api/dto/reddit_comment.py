@@ -16,7 +16,8 @@ class Comment(BaseModel):
 
 
 class CommentRequest(BaseModel):
-    video_name: str
+    youtube_url: str = ''
+    video_name: str = ''
     comments: List[Comment]
 
 
