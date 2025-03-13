@@ -11,11 +11,11 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-COPY run.py .
-
 # Copy requirements first to leverage Docker cache
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+
+COPY run.py .
 
 # Expose the port FastAPI runs on
 EXPOSE 8000
