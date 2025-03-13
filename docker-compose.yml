@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build: .
@@ -13,8 +11,3 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
     restart: unless-stopped
-
-volumes:
-  download:
-  generated:
-  assets:
