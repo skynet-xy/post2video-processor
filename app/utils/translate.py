@@ -1,8 +1,9 @@
-from google.cloud import translate_v2 as translate
 import os
 
+from google.cloud import translate_v2 as translate
+
 # Path to your key file
-key_path = os.path.join("keys", "capable-shape-452021-u9-06c66c66092c.json")
+key_path = os.path.join("../../keys", "capable-shape-452021-u9-06c66c66092c.json")
 
 # Set environment variable to point to your credentials file
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_path

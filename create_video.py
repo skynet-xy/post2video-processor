@@ -1,11 +1,13 @@
 import os
 
-from comment_audio_generator import generate_comments_with_duration
+from moviepy.editor import VideoFileClip
 
-from reddit_comment_overlay import RedditCommentOverlay
+from app.utils.comment_audio_generator import generate_comments_with_duration
+from app.utils.reddit_comment_overlay import add_comments_to_video, write_videofile
+from app.utils.trim_video import trim_video_to_fit_comments
 
 
-def get_first_video_in_directory(directory="./output"):
+def get_first_video_in_directory(directory="./generated/output"):
     # Create directory if it doesn't exist
     if not os.path.exists(directory):
         os.makedirs(directory)
@@ -81,7 +83,7 @@ def generate_comments():
 
 
 if __name__ == '__main__':
-    OUTPUT_DIR = "./output"
+    OUTPUT_DIR = "generated/output"
     # Path to your input video
     INPUT_VIDEO = get_first_video_in_directory(OUTPUT_DIR)
     OUTPUT_VIDEO = OUTPUT_DIR + "/output_video.mp4"
@@ -91,12 +93,12 @@ if __name__ == '__main__':
         exit(1)
 
     # Create the overlay processor
-    overlay = RedditCommentOverlay(INPUT_VIDEO)
+    video = VideoFileClip(INPUT_VIDEO)
     comments = generate_comments()
-    video = overlay.add_comments_to_video(overlay.video, comments)
-    video = overlay.trim_video_to_fit_comments(video, comments)
-    output_path = overlay.write_videofile(video, OUTPUT_VIDEO)
+    video = add_comments_to_video(video, comments)
+    video = trim_video_to_fit_comments(video, comments)
+    output_path = write_videofile(video, OUTPUT_VIDEO)
     print(f"Video successfully created at: {output_path}")
 
     # Clean up resources
-    overlay.close()
+    video.close()

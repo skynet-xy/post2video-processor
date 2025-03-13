@@ -1,7 +1,9 @@
 import os
 import tempfile
+
 from moviepy.editor import AudioFileClip
-from text_to_speech import generate_audio_from_text
+
+from app.utils.text_to_speech import generate_audio_from_text
 
 
 def generate_comments_with_duration(comments, target_duration, pause_time=1, allow_exceed_duration=True):

@@ -2,6 +2,7 @@ import hashlib
 import os
 
 from google.cloud import texttospeech
+from moviepy.audio.io.AudioFileClip import AudioFileClip
 
 
 def generate_audio_from_text(text, language_code="en-US", voice_name="en-US-Standard-D",
@@ -26,7 +27,7 @@ def generate_audio_from_text(text, language_code="en-US", voice_name="en-US-Stan
         f"{text}_{language_code}_{voice_name}_{speaking_rate}_{pitch}".encode()
     ).hexdigest()
 
-    output_dir = "cache"
+    output_dir = "../../cache"
     os.makedirs(output_dir, exist_ok=True)
     output_file = os.path.join(output_dir, f"tts_{content_hash}.mp3")
 
@@ -70,22 +71,23 @@ def generate_audio_from_text(text, language_code="en-US", voice_name="en-US-Stan
     return output_file
 
 
-if __name__ == "__main__":
-    # Example usage
-    text = [
-        "This video is hilarious! I can't stop watching it over and over again.",
-        "I think this deserves to go viral! So clever and well made.",
-        "The way you edited this is amazing. What software did you use?",
-        "Incredible! This is one of the best videos I've seen in a while.",
-        "Wow, the editing here is on another level. Great job!",
-        "Such a beautiful video. The scenes and music are perfect together.",
-        "The soundtrack you chose fits perfectly with the visuals. Love it!",
-        "This video makes me want to go on an adventure! So inspiring.",
-        "I can't believe how good this video is. The food shots are mouth-watering.",
-        "This is the motivation I needed today. Keep up the great work!",
-    ]
+def generate_comment_audio(comment):
+    """Generate audio for a comment using text-to-speech.
 
-    output_file = generate_audio_from_text(
-        text=" ".join(text),
-        output_file="output/speech.mp3"
+    Args:
+        comment (dict): Comment data including 'text'
+
+    Returns:
+        tuple: (audio_clip, audio_path)
+    """
+
+    # Generate the audio file
+    audio_path = generate_audio_from_text(
+        text=comment['text'],
+        speaking_rate=1.0
     )
+
+    # Create AudioFileClip
+    audio_clip = AudioFileClip(audio_path)
+
+    return audio_clip, audio_path
