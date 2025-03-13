@@ -4,6 +4,8 @@ import os
 from google.cloud import texttospeech
 from moviepy.audio.io.AudioFileClip import AudioFileClip
 
+from app.api.dto.reddit_dto import Comment
+
 
 def generate_audio_from_text(text, language_code="en-US", voice_name="en-US-Standard-D",
                              speaking_rate=1.0, pitch=0.0,
@@ -71,7 +73,7 @@ def generate_audio_from_text(text, language_code="en-US", voice_name="en-US-Stan
     return output_file
 
 
-def generate_comment_audio(comment):
+def generate_comment_audio(comment: Comment):
     """Generate audio for a comment using text-to-speech.
 
     Args:
@@ -83,7 +85,7 @@ def generate_comment_audio(comment):
 
     # Generate the audio file
     audio_path = generate_audio_from_text(
-        text=comment['text'],
+        text=comment.text,
         speaking_rate=1.0
     )
 
