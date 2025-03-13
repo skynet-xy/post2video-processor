@@ -1,4 +1,9 @@
-def trim_video_to_fit_comments(video, comments_data):
+from typing import List
+
+from app.api.dto.reddit_dto import Comment
+
+
+def trim_video_to_fit_comments(video, comments_data: List[Comment]):
     """
     Trim the video to fit exactly the duration of the comments
     Args:
@@ -12,8 +17,8 @@ def trim_video_to_fit_comments(video, comments_data):
         return video
 
     # Calculate the total duration needed for all comments
-    last_comment = max(comments_data, key=lambda x: x['start_time'] + x['duration'])
-    total_duration = last_comment['start_time'] + last_comment['duration']
+    last_comment = max(comments_data, key=lambda x: x.start_time + x.duration)
+    total_duration = last_comment.start_time + last_comment.duration
 
     # Simply trim the video to the required duration
     print(f"Trimming video to {total_duration} seconds")

@@ -2,11 +2,13 @@ import os
 import textwrap
 import uuid
 from datetime import datetime
+from typing import List
 
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 from moviepy.editor import VideoFileClip, ImageClip, CompositeVideoClip
 
+from app.api.dto.reddit_dto import Comment
 from app.core.config import settings
 from app.utils.text_to_speech import generate_comment_audio
 
@@ -84,13 +86,13 @@ def _create_reddit_comment(username, comment_text, avatar_path=None, width=500, 
     return comment_img
 
 
-def add_comments_to_video(video, comments_data):
+def add_comments_to_video(video, comments_data: List[Comment]):
     """
     Add multiple comments with audio to the video
 
     Args:
         video (VideoFileClip): The original video
-        comments_data (list): List of dictionaries containing comment data
+        comments_data (list): List of Comment
 
     Returns:
         CompositeVideoClip: The final video with comments added
@@ -105,9 +107,9 @@ def add_comments_to_video(video, comments_data):
     for comment in comments_data:
         # Create comment image
         comment_img = _create_reddit_comment(
-            username=comment['username'],
-            comment_text=comment['text'],
-            avatar_path=comment.get('avatar'),
+            username=comment.username,
+            comment_text=comment.text,
+            avatar_path=comment.avatar,
             width=int(video.w * 0.8)  # Make comment 80% of video width
         )
 
@@ -124,14 +126,14 @@ def add_comments_to_video(video, comments_data):
         # Set duration and position
         img_clip = (img_clip
                     .set_position((position_x, position_y))
-                    .set_start(comment['start_time'])
-                    .set_duration(comment['duration']))
+                    .set_start(comment.start_time)
+                    .set_duration(comment.duration))
 
         video_clips.append(img_clip)
 
         # Generate and add audio for this comment
         audio_clip, _ = generate_comment_audio(comment)
-        audio_clip = audio_clip.set_start(comment['start_time'])
+        audio_clip = audio_clip.set_start(comment.start_time)
         audio_clips.append(audio_clip)
 
     # Create composite video

@@ -4,6 +4,8 @@ class Comment(BaseModel):
     username: str
     text: str
     avatar: str
+    start_time: float = 0
+    duration: float = 0
     # position_x: int = 10  # X position (px from left)
     # position_y: int = 10  # Y position (px from top)
     # font_size: int = 24   # Font size
