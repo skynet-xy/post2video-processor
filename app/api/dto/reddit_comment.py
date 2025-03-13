@@ -16,7 +16,7 @@ class Comment(BaseModel):
 
 
 class CommentRequest(BaseModel):
-    video_path: str
+    video_name: str
     comments: List[Comment]
 
 

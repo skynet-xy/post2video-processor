@@ -37,8 +37,10 @@ class VideoService:
 
             # Clean up resources
             video.close()
-
-
+            return ResponseMessage(
+                success=True,
+                message="Successfully added video to queue",
+            )
         except Exception as e:
             raise HTTPException(
                 status_code=500,

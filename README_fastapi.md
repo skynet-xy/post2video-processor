@@ -19,41 +19,36 @@ This service provides an API to trim videos using FastAPI.
   uvicorn app.main:app --reload
 ```
 
-2. Send a POST request to the `/api/video/trim/` endpoint with the following parameters:
-    - `file`: The video file to be trimmed
-    - `start_time`: The start time in seconds
-    - `end_time`: The end time in seconds
-
-Example using `requests` in Python:
-
-```python
-import requests
-
-url = 'http://localhost:8000/api/video/trim/'
-files = {'file': open('path/to/your/video.mp4', 'rb')}
-data = {'start_time': 0, 'end_time': 103}
-
-response = requests.post(url, files=files, data=data)
-with open('trimmed_video.mp4', 'wb') as f:
-    f.write(response.content)
+2. Download a video file
+```shell
+yt-dlp "https://www.youtube.com/watch?v=ZkHKGWKq9mY"
 ```
-or 
+
+3. Move video file to `assets/video_temples/` folder with name `minecraft_1.webm`
+
+4. Send a POST request to the `/api/video/add-reddit-comments/` endpoint:
+Example:
+
 ```bash
-    curl -X 'POST' \
-      'http://localhost:8000/api/video/trim/' \
-      -H 'accept: application/json' \
-      -H 'Content-Type: multipart/form-data' \
-      -F 'file=@path/to/video.mp4' \
-      -F 'start_time=0' \
-      -F 'end_time=103' \
-      --output trimmed_video.mp4
+curl -X POST "http://localhost:8000/api/video/add-reddit-comments/" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "video_name": "minecraft_1.webm",
+    "comments": [
+      {
+        "text": "This is a sample comment",
+        "time_start": 1.5,
+        "time_end": 6.5
+      },
+      {
+        "text": "Another comment example",
+        "time_start": 8.0,
+        "time_end": 12.0
+      }
+    ]
+  }'
 ```
   
-## Endpoints
-
-- `GET /`: Returns a welcome message
-- `POST /api/video/trim/`: Trims the provided video file based on the start and end times
-
 ## Requirements
 
 - Python 3.6+

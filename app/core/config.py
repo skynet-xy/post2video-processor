@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     ASSETS_DIR: Path = BASE_DIR / "assets"
     FONTS_DIR: Path = ASSETS_DIR / "fonts"
     DEFAULT_AVATAR: Path = ASSETS_DIR / "defaults/default_avatar.png"
+    VIDEO_TEMPLATES_DIR: Path = ASSETS_DIR / "video_templates"
 
     # CORS settings
     BACKEND_CORS_ORIGINS: list[str] = ["*"]
@@ -33,6 +34,6 @@ settings = Settings()
 
 # Ensure directories exist
 os.makedirs(settings.OUTPUT_DIR, exist_ok=True)
-os.makedirs(settings.ASSETS_DIR, exist_ok=True)
 os.makedirs(settings.CACHE_DIR, exist_ok=True)
 os.makedirs(settings.FONTS_DIR, exist_ok=True)
+os.makedirs(settings.VIDEO_TEMPLATES_DIR, exist_ok=True)
