@@ -22,13 +22,13 @@ COPY . .
 RUN mkdir -p fonts generated/output download assets
 
 # Download default font if not present
-RUN if [ ! -f fonts/arial.ttf ] || [ ! -f fonts/arial_bold.ttf ]; then \
+RUN if [ ! -f assets/fonts/arial.ttf ] || [ ! -f assets/fonts/arial_bold.ttf ]; then \
     apt-get update && apt-get install -y wget fontconfig && \
     mkdir -p /usr/share/fonts/truetype/ && \
     wget -q -O /usr/share/fonts/truetype/arial.ttf https://github.com/matomo-org/travis-scripts/raw/master/fonts/Arial.ttf && \
     wget -q -O /usr/share/fonts/truetype/arial_bold.ttf https://github.com/matomo-org/travis-scripts/raw/master/fonts/Arial_Bold.ttf && \
-    cp /usr/share/fonts/truetype/arial.ttf fonts/arial.ttf && \
-    cp /usr/share/fonts/truetype/arial_bold.ttf fonts/arial_bold.ttf && \
+    cp /usr/share/fonts/truetype/arial.ttf assets/fonts/arial.ttf && \
+    cp /usr/share/fonts/truetype/arial_bold.ttf assets/fonts/arial_bold.ttf && \
     fc-cache -f -v; \
     fi
 
