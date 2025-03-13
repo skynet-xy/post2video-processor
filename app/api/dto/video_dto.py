@@ -4,15 +4,7 @@ from typing import Optional, Any
 
 from pydantic import BaseModel
 
-
-class Comment(BaseModel):
-    text: str
-    time_start: float  # When comment appears (seconds)
-    time_end: float  # When comment disappears (seconds)
-    # position_x: int = 10  # X position (px from left)
-    # position_y: int = 10  # Y position (px from top)
-    # font_size: int = 24   # Font size
-    # color: str = "white"  # Text color
+from app.api.dto.reddit_dto import Comment
 
 
 class CommentRequest(BaseModel):

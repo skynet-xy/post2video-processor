@@ -1,5 +1,7 @@
 import praw
 
+from app.api.dto.reddit_dto import Comment
+
 
 class RedditService:
     def __init__(self, reddit_client_id, reddit_client_secret, reddit_user_agent):
@@ -16,7 +18,18 @@ class RedditService:
         submission.comment_sort = "top"  # Sort by top comments
         submission.comments.replace_more(limit=0)  # Don't expand "load more comments"
 
-        # Only get top-level comments (no children) and respect the limit
-        top_comments = [comment.body for comment in submission.comments[:limit]]
+        comments = []
+        for comment in submission.comments[:limit]:
+            # Extract username and comment text
+            username = comment.author.name if comment.author else "[deleted]"
+            text = comment.body
+            # Use Reddit's default avatar as a placeholder
+            avatar = "/avatar_default_0.png"
 
-        return top_comments
+            comments.append(Comment(
+                username=username,
+                text=text,
+                avatar=avatar
+            ))
+
+        return comments
