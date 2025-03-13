@@ -54,7 +54,7 @@ def generate_comments_with_duration(comments: List[Comment], target_duration, pa
         # Add comment to the processed list with duration and audio info
         comment_copy = comment.model_copy()
         comment_copy.duration = comment_duration
-        comment_copy.audio_path = audio_file
+        # comment_copy.audio_path = audio_file
         comment_copy.start_time = cumulative_duration if len(
             processed_comments) == 0 else cumulative_duration + pause_time
 
