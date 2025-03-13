@@ -21,19 +21,16 @@ This service provides an API to trim videos using FastAPI.
 
 2. Download a video file
 ```shell
-yt-dlp "https://www.youtube.com/watch?v=ZkHKGWKq9mY"
+python download_video.py
 ```
-
-3. Move video file to `assets/video_temples/` folder with name `minecraft_1.webm`
-
-4. Send a POST request to the `/api/video/add-reddit-comments/` endpoint:
+3. Send a POST request to the `/api/video/add-reddit-comments/` endpoint:
 Example:
 
 ```bash
 curl -X POST "http://localhost:8000/api/video/add-reddit-comments/" \
   -H "Content-Type: application/json" \
   -d '{
-    "video_name": "minecraft_1.webm",
+    "video_name": "ZkHKGWKq9mY-standard-6_Minutes_Minecraft_Shader_Parkour_Gamepla.mp4",
     "comments": [
       {
         "text": "This is a sample comment",

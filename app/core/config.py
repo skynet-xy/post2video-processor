@@ -25,6 +25,11 @@ class Settings(BaseSettings):
     # CORS settings
     BACKEND_CORS_ORIGINS: list[str] = ["*"]
 
+    # Reddit settings
+    REDDIT_CLIENT_ID: str = "ZdHLafxpZo6OtKIIn0uPOA"
+    REDDIT_CLIENT_SECRET: str = "PZRwrx8xwktG1-LZIGrpYZGl2oqNpg"
+    REDDIT_USER_AGENT: str = "fr.allaboutfrance:v1.0 (by /u/One-Accountant2011)"
+
     class Config:
         case_sensitive = True
         env_file = ".env"

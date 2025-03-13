@@ -4,7 +4,7 @@ import os
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.api.deps import get_video_service
-from app.api.dto.reddit_comment import CommentRequest, ResponseMessage
+from app.api.dto.video_dto import CommentRequest, ResponseMessage
 from app.core.config import settings
 from app.services.video_service import VideoService
 

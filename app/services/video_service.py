@@ -6,7 +6,7 @@ import yt_dlp as youtube_dl
 from fastapi import HTTPException
 from moviepy.editor import VideoFileClip
 
-from app.api.dto.reddit_comment import Comment, ResponseMessage
+from app.api.dto.video_dto import Comment, ResponseMessage
 from app.utils.reddit_comment_overlay import add_comments_to_video, write_videofile
 from app.utils.trim_video import trim_video_to_fit_comments
 from create_video import generate_comments
