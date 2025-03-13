@@ -11,13 +11,6 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first to leverage Docker cache
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy application code
-COPY . .
-
 # Create necessary directories
 RUN mkdir -p fonts generated/output download assets
 
@@ -31,6 +24,10 @@ RUN if [ ! -f assets/fonts/arial.ttf ] || [ ! -f assets/fonts/arial_bold.ttf ]; 
     cp /usr/share/fonts/truetype/arial_bold.ttf assets/fonts/arial_bold.ttf && \
     fc-cache -f -v; \
     fi
+
+# Copy requirements first to leverage Docker cache
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Expose the port FastAPI runs on
 EXPOSE 8000
