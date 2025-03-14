@@ -13,3 +13,33 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
     restart: unless-stopped
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_DB: app
+      POSTGRES_PASSWORD: 1
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./database/volumes/postgres/17/data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  atlas:
+    image: arigaio/atlas
+    command: >
+      schema apply
+      -u "postgres://app:1@postgres:5432/app?search_path=public&sslmode=disable"
+      --to "file://public.sql"
+      --dev-url "postgres://app:1@postgres:5432/app?search_path=atlas_dev&sslmode=disable"
+      --auto-approve
+    volumes:
+      - ./database/schema:/schema
+    depends_on:
+      postgres:
+        condition: service_healthy
+    working_dir: /schema
