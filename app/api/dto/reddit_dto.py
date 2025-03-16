@@ -18,5 +18,6 @@ class RedditCommentsRequest(BaseModel):
 
 
 class RedditCommentsResponse(BaseModel):
+    title: str
     comments: list[Comment]
     count: int

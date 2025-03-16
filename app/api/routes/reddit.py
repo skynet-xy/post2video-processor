@@ -12,13 +12,17 @@ async def fetch_reddit_comments(
         request: RedditCommentsRequest,
         reddit_service: RedditService = Depends(get_reddit_service)
 ) -> RedditCommentsResponse:
-    """Fetch top comments from a Reddit post."""
-    comments = reddit_service.fetch_top_comments(
+    """Fetch top comments and thread title from a Reddit post."""
+    response = reddit_service.fetch_top_comments(
         post_url=str(request.post_url),
         limit=request.limit
     )
 
+    title = response["title"]
+    comments = response["comments"]
+
     return RedditCommentsResponse(
+        title=title,
         comments=comments,
         count=len(comments)
     )
