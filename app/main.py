@@ -21,7 +21,8 @@ app.include_router(video.router, prefix="/api")
 app.include_router(reddit.router, prefix="/api")
 
 # Mount the static directory
-app.mount("/videos", StaticFiles(directory="generated/output"), name="videos")
+app.mount("/static/output", StaticFiles(directory="generated/output"), name="output")
+app.mount("/static/assets", StaticFiles(directory="assets"), name="assets")
 
 
 @app.get("/")
