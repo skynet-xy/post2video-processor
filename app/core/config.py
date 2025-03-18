@@ -1,12 +1,22 @@
 import os
+from dataclasses import field
 from pathlib import Path
 
 from pydantic_settings import BaseSettings
 
 
+def _default_cors_settings() -> list[str]:
+    return ["*"]
+
 class Settings(BaseSettings):
     API_V1_STR: str = "/api"
     PROJECT_NAME: str = "Post 2 Video API"
+
+    # CORS settings
+    BACKEND_CORS_ORIGINS: list[str] = field(default_factory=_default_cors_settings)
+    ALLOW_CREDENTIALS: bool = True
+    ALLOW_METHODS: list[str] = field(default_factory=_default_cors_settings)
+    ALLOW_HEADERS: list[str] = field(default_factory=_default_cors_settings)
 
     # Base directory is the project root
     BASE_DIR: Path = Path(__file__).resolve().parent.parent.parent
@@ -22,9 +32,6 @@ class Settings(BaseSettings):
     DEFAULT_AVATAR: Path = ASSETS_DIR / "defaults/default_avatar.png"
     VIDEO_TEMPLATES_DIR: Path = ASSETS_DIR / "video_templates"
 
-    # CORS settings
-    BACKEND_CORS_ORIGINS: list[str] = ["*"]
-
     # Reddit settings
     REDDIT_CLIENT_ID: str = "ZdHLafxpZo6OtKIIn0uPOA"
     REDDIT_CLIENT_SECRET: str = "PZRwrx8xwktG1-LZIGrpYZGl2oqNpg"
@@ -33,6 +40,7 @@ class Settings(BaseSettings):
     class Config:
         case_sensitive = True
         env_file = ".env"
+
 
 # Create settings instance
 settings = Settings()
