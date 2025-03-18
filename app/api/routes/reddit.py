@@ -13,7 +13,7 @@ async def fetch_reddit_comments(
         reddit_service: RedditService = Depends(get_reddit_service)
 ) -> RedditCommentsResponse:
     """Fetch top comments and thread title from a Reddit post."""
-    response = reddit_service.fetch_top_comments(
+    response = await reddit_service.fetch_top_comments(
         post_url=str(request.post_url),
         limit=request.limit
     )

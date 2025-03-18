@@ -1,4 +1,4 @@
-import praw
+import asyncpraw
 
 from app.api.dto.reddit_dto import Comment
 
@@ -9,17 +9,20 @@ class RedditService:
         self.reddit_client_secret = reddit_client_secret
         self.reddit_user_agent = reddit_user_agent
 
-    def fetch_top_comments(self, post_url: str, limit: int = 10):
-        reddit = praw.Reddit(client_id=self.reddit_client_id,
-                             client_secret=self.reddit_client_secret,
-                             user_agent=self.reddit_user_agent)
+    async def fetch_top_comments(self, post_url: str, limit: int = 10):
+        reddit = asyncpraw.Reddit(client_id=self.reddit_client_id,
+                               client_secret=self.reddit_client_secret,
+                               user_agent=self.reddit_user_agent)
 
-        submission = reddit.submission(url=post_url)
+        submission = await reddit.submission(url=post_url)
         submission.comment_sort = "top"  # Sort by top comments
-        submission.comments.replace_more(limit=0)  # Don't expand "load more comments"
+        await submission.comments.replace_more(limit=0)  # Don't expand "load more comments"
 
         comments = []
-        for comment in submission.comments[:limit]:
+        async for comment in submission.comments:
+            if len(comments) >= limit:
+                break
+
             # Extract username and comment text
             username = comment.author.name if comment.author else "[deleted]"
             text = comment.body
@@ -31,6 +34,8 @@ class RedditService:
                 text=text,
                 avatar=avatar
             ))
+
+        await reddit.close()  # Important to close the connection when done
 
         return {
             "title": submission.title,
