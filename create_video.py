@@ -2,12 +2,18 @@ import os
 
 from moviepy.editor import VideoFileClip
 
+from app.api.dto.reddit_dto import Comment
 from app.utils.comment_audio_generator import generate_comments_with_duration
 from app.utils.reddit_comment_overlay import add_comments_to_video, write_videofile
 from app.utils.trim_video import trim_video_to_fit_comments
 
 
-def get_first_video_in_directory(directory="./assets/video_templates"):
+def convert_dict_comments_to_objects(comment_dicts):
+    """Convert a list of comment dictionaries to Comment objects"""
+    return [Comment(**comment_dict) for comment_dict in comment_dicts]
+
+
+def get_first_video_in_directory(directory="./generated/output"):
     # Create directory if it doesn't exist
     if not os.path.exists(directory):
         os.makedirs(directory)
@@ -30,7 +36,7 @@ def get_first_video_in_directory(directory="./assets/video_templates"):
 # In the generate_comments function
 def generate_comments():
     # Define comments to overlay on the video
-    comments = [
+    comment_dicts = [
         {
             "username": "JohnDoe123",
             "text": "This video is hilarious! I can't stop watching it over and over again.",
@@ -75,9 +81,11 @@ def generate_comments():
             "avatar": "assets/avatar2.png",
         }
     ]
+    comment_objects = [Comment(**comment) for comment in comment_dicts]
 
     target_duration = 15.0  # Target duration in seconds
-    processed_comments, duration = generate_comments_with_duration(comments, target_duration, allow_exceed_duration=True)
+    processed_comments, duration = generate_comments_with_duration(comment_objects, target_duration,
+                                                                   allow_exceed_duration=True)
 
     return processed_comments
 
