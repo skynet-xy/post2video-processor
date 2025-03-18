@@ -5,11 +5,13 @@ from google.cloud import texttospeech
 from moviepy.audio.io.AudioFileClip import AudioFileClip
 
 from app.api.dto.reddit_dto import Comment
+from app.core.config import settings
 
 
 def generate_audio_from_text(text, language_code="en-US", voice_name="en-US-Standard-D",
                              speaking_rate=1.0, pitch=0.0,
-                             credentials_path="./keys/capable-shape-452021-u9-06c66c66092c.json"):
+                             credentials_path="./keys/capable-shape-452021-u9-06c66c66092c.json",
+                             output_dir=None):
     """
     Convert text to speech using Google Cloud TTS API
 
@@ -29,7 +31,8 @@ def generate_audio_from_text(text, language_code="en-US", voice_name="en-US-Stan
         f"{text}_{language_code}_{voice_name}_{speaking_rate}_{pitch}".encode()
     ).hexdigest()
 
-    output_dir = "../../cache"
+    if output_dir is None:
+        output_dir = settings.CACHE_DIR
     os.makedirs(output_dir, exist_ok=True)
     output_file = os.path.join(output_dir, f"tts_{content_hash}.mp3")
 

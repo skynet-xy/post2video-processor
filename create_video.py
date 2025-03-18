@@ -1,8 +1,10 @@
 import os
+from pathlib import Path
 
 from moviepy.editor import VideoFileClip
 
 from app.api.dto.reddit_dto import Comment
+from app.core.config import settings
 from app.utils.comment_audio_generator import generate_comments_with_duration
 from app.utils.reddit_comment_overlay import add_comments_to_video, write_videofile
 from app.utils.trim_video import trim_video_to_fit_comments
@@ -13,7 +15,7 @@ def convert_dict_comments_to_objects(comment_dicts):
     return [Comment(**comment_dict) for comment_dict in comment_dicts]
 
 
-def get_first_video_in_directory(directory="./generated/output"):
+def get_first_video_in_directory(directory="./assets/video_templates"):
     # Create directory if it doesn't exist
     if not os.path.exists(directory):
         os.makedirs(directory)
@@ -91,6 +93,7 @@ def generate_comments():
 
 
 if __name__ == '__main__':
+    settings.CACHE_DIR = Path("/tmp/post2video")
     OUTPUT_DIR = "generated/output"
     # Path to your input video
     INPUT_VIDEO = get_first_video_in_directory(OUTPUT_DIR)
