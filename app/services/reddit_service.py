@@ -32,9 +32,7 @@ class RedditService:
                 avatar=avatar
             ))
 
-         return {
+        return {
             "title": submission.title,
             "comments": comments
         }
-
-    
