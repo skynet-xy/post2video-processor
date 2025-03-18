@@ -7,7 +7,7 @@ from app.utils.reddit_comment_overlay import add_comments_to_video, write_videof
 from app.utils.trim_video import trim_video_to_fit_comments
 
 
-def get_first_video_in_directory(directory="./generated/output"):
+def get_first_video_in_directory(directory="./assets/video_templates"):
     # Create directory if it doesn't exist
     if not os.path.exists(directory):
         os.makedirs(directory)
