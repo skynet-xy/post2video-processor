@@ -18,6 +18,7 @@ from app.utils.reddit_comment_overlay import add_comments_to_video, write_videof
 from app.utils.trim_video import trim_video_to_fit_comments
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 class VideoService:
@@ -99,16 +100,13 @@ class VideoService:
     async def process_video_job(self, job_code: str):
         """
         Process a video job in the background.
-
-        Args:
-            job_code: The unique identifier of the job
         """
         try:
             # Get job details from database
             async with get_db() as db:
                 db_session = db()
                 query = """
-                SELECT video_name, comments 
+                SELECT video_name, comments
                 FROM job_add_reddit_comment_overlay
                 WHERE job_code = :job_code AND status = 'pending'
                 """
@@ -128,8 +126,9 @@ class VideoService:
                     {"job_code": job_code}
                 )
                 await db_session.commit()
+                logger.info(f"Updated job {job_code} to processing status")
 
-            # Get the video path
+            # Get the video path and process
             video_path = os.path.join(self.video_templates_dir, video_name)
             comments = [Comment(**comment) for comment in comments_data]
 
@@ -143,35 +142,45 @@ class VideoService:
             output_path = write_videofile(video)
             video.close()
 
-            # Update job status to completed
-            async with get_db() as db:
-                db_session = db()
-                await db_session.execute(
-                    text("""
-                    UPDATE job_add_reddit_comment_overlay 
-                    SET status = 'completed', output_path = :output_path 
+            logger.info(f"Video processing completed, output path: {output_path}")
+
+            # Update job status to completed - wrap this in its own try block
+            try:
+                async with get_db() as db:
+                    db_session = db()
+                    update_query = """
+                    UPDATE job_add_reddit_comment_overlay
+                    SET status = 'completed', output_path = :output_path
                     WHERE job_code = :job_code
-                    """),
-                    {"job_code": job_code, "output_path": output_path}
-                )
-                await db_session.commit()
+                    """
+                    await db_session.execute(
+                        text(update_query),
+                        {"job_code": job_code, "output_path": output_path}
+                    )
+                    await db_session.commit()
+            except Exception as update_error:
+                logger.error(f"Failed to update job status to completed: {str(update_error)}", exc_info=True)
+                raise
 
             logger.info(f"Job {job_code} processed successfully")
 
         except Exception as e:
             logger.error(f"Error processing job {job_code}: {str(e)}", exc_info=True)
             # Update job status to failed
-            async with get_db() as db:
-                db_session = db()
-                await db_session.execute(
-                    text("""
-                    UPDATE job_add_reddit_comment_overlay 
-                    SET status = 'failed', error_message = :error 
-                    WHERE job_code = :job_code
-                    """),
-                    {"job_code": job_code, "error": str(e)}
-                )
-                await db_session.commit()
+            try:
+                async with get_db() as db:
+                    db_session = db()
+                    await db_session.execute(
+                        text("""
+                        UPDATE job_add_reddit_comment_overlay
+                        SET status = 'failed', error_message = :error
+                        WHERE job_code = :job_code
+                        """),
+                        {"job_code": job_code, "error": str(e)}
+                    )
+                    await db_session.commit()
+            except Exception as update_error:
+                logger.error(f"Failed to update job status to failed: {str(update_error)}", exc_info=True)
 
     async def download_youtube_video(self, url: str, height=720, output_path=None, max_retries=3) -> Tuple[
         str, Dict[str, Any]]:
