@@ -5,7 +5,6 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./download:/app/download
       - ./generated:/app/generated
       - ./assets:/app/assets
       - ./app:/app/app

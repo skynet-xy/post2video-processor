@@ -37,6 +37,13 @@ class Settings(BaseSettings):
     REDDIT_CLIENT_SECRET: str = "PZRwrx8xwktG1-LZIGrpYZGl2oqNpg"
     REDDIT_USER_AGENT: str = "fr.allaboutfrance:v1.0 (by /u/One-Accountant2011)"
 
+    # Database settings
+    DB_USER: str = "app"
+    DB_PASSWORD: str = "1"
+    DB_HOST: str = "postgres"
+    DB_PORT: str = "5432"
+    DB_NAME: str = "app"
+
     class Config:
         case_sensitive = True
         env_file = ".env"

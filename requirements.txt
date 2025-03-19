@@ -13,3 +13,5 @@ pydantic-settings
 python-dotenv
 python-multipart
 asyncpraw
+sqlalchemy
+asyncpg
