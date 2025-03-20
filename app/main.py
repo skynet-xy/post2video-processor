@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from app.api.routes import video, reddit
+from app.api.routes import video, crawl
 from app.core.config import settings
 
 app = FastAPI(title="Post 2 Video API")
@@ -18,7 +18,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(video.router, prefix="/api")
-app.include_router(reddit.router, prefix="/api")
+app.include_router(crawl.router, prefix="/api")
 
 # Mount the static directory
 app.mount("/static/output", StaticFiles(directory="generated/output"), name="output")

@@ -10,7 +10,7 @@ from app.services.video_service import VideoService
 router = APIRouter(prefix="/video", tags=["Video Operations"])
 
 
-@router.post("/add-reddit-comments/")
+@router.post("/process-reddit-comments-video/")
 async def add_comments_to_video(
         request: CommentRequest,
         background_tasks: BackgroundTasks,
