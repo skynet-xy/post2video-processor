@@ -17,7 +17,7 @@ class Language(str, Enum):
     VN = "vi-VN"
 
 class CommentRequest(BaseModel):
-    youtube_url: str = Field(default='', description="URL of YouTube video to download")
+    # youtube_url: str = Field(default='', description="URL of YouTube video to download")
     video_name: str = Field(default='x3.mp4', description="Name of template video to use")
     comments: List[Comment] = Field(description="List of comments to overlay on the video")
     voice_gender: Optional[str] = Field(

@@ -78,7 +78,7 @@ async def get_output_video(job_code: str) -> ResponseMessage:
             message=f"Error retrieving output video path: {str(e)}",
             data=None
         )
-@router.post("/status/{job_code}")
+@router.get("/status/{job_code}")
 async def get_job_status(job_code: str, video_service: VideoService = Depends(get_video_service)) -> JobStatusResponse:
     """Get the status of a video processing job."""
     return await video_service.get_job_status(job_code)
