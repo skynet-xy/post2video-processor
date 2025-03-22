@@ -99,14 +99,12 @@ def _create_reddit_title(title_text, width=800, avatar_path=None, default_avatar
     Returns:
         PIL.Image: Image containing the rendered title card
     """
-    from PIL import Image, ImageDraw, ImageFont
-    import os
-    import textwrap
 
+    font_dir = settings.FONTS_DIR
     # Set up fonts - make title font larger than comment font
-    font_path = os.path.join(os.path.dirname(__file__), '..', 'assets', 'fonts', 'arial.ttf')
-    bold_font_path = os.path.join(os.path.dirname(__file__), '..', 'assets', 'fonts', 'arial_bold.ttf')
-    title_font = ImageFont.truetype(bold_font_path, 22) if os.path.exists(bold_font_path) else ImageFont.load_default()
+    title_font = ImageFont.truetype(os.path.join(font_dir, "arial_bold.ttf"), 22)
+    font = ImageFont.truetype(os.path.join(font_dir, "arial.ttf"), 14)
+
 
     # Avatar setup (same as comment function)
     avatar_size = 40
@@ -149,7 +147,7 @@ def _create_reddit_title(title_text, width=800, avatar_path=None, default_avatar
 
     # Add "POST TITLE" indicator
     indicator_position = (avatar_size + padding * 2, padding)
-    draw.text(indicator_position, "POST TITLE", font=ImageFont.truetype(font_path, 14), fill=(255, 69, 0))
+    draw.text(indicator_position, "POST TITLE", font=font, fill=(255, 69, 0))
 
     # Add title text
     title_position = (avatar_size + padding * 2, padding + 25)
