@@ -8,7 +8,7 @@ from app.api.dto.reddit_dto import Comment
 from app.utils.text_to_speech import generate_audio_from_text
 
 
-def generate_comments_with_duration(comments: List[Comment], target_duration, pause_time=1, allow_exceed_duration=True):
+def generate_comments_with_duration(comments: List[Comment], target_duration, pause_time=1, allow_exceed_duration=True, lang="en-US", voice="en-US-Standard-D"):
     """
     Generate audio for comments that fit within the target duration using a fixed pause time.
     Comments that would cause the total duration to exceed the target are not used.
@@ -18,6 +18,8 @@ def generate_comments_with_duration(comments: List[Comment], target_duration, pa
         target_duration (float): Target total duration in seconds
         pause_time (float): Fixed pause time between comments in seconds
         allow_exceed_duration (bool): If True, include all comments even if they exceed target duration
+        lang (str): Language code (e.g., 'en-US')
+        voice (str): Voice name (e.g., 'en-US-Standard-D')
 
     Returns:
         tuple: (processed_comments, cumulative_duration) - processed comments and their total duration
@@ -35,7 +37,9 @@ def generate_comments_with_duration(comments: List[Comment], target_duration, pa
     # Process comments one by one until we hit the duration limit
     for comment in comments:
         # Generate audio with default speaking rate
-        audio_file = generate_audio_from_text(text=comment.text, speaking_rate=1.0)
+        audio_file = generate_audio_from_text(text=comment.text, speaking_rate=1.0,
+                                              language_code=lang,
+                                              voice_name=voice)
 
         # Get audio duration
         audio_clip = AudioFileClip(audio_file)
