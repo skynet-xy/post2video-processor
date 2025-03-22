@@ -104,8 +104,8 @@ def _create_reddit_title(title_text, width=800, avatar_path=None, default_avatar
     import textwrap
 
     # Set up fonts - make title font larger than comment font
-    font_path = os.path.join(os.path.dirname(__file__), '..', 'assets', 'fonts', 'Roboto-Regular.ttf')
-    bold_font_path = os.path.join(os.path.dirname(__file__), '..', 'assets', 'fonts', 'Roboto-Bold.ttf')
+    font_path = os.path.join(os.path.dirname(__file__), '..', 'assets', 'fonts', 'arial.ttf')
+    bold_font_path = os.path.join(os.path.dirname(__file__), '..', 'assets', 'fonts', 'arial_bold.ttf')
     title_font = ImageFont.truetype(bold_font_path, 22) if os.path.exists(bold_font_path) else ImageFont.load_default()
 
     # Avatar setup (same as comment function)
