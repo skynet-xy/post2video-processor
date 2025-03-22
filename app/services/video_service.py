@@ -16,8 +16,8 @@ from app.db.session import get_db
 from app.services.video.video_proglog import VideoProgLog
 from app.utils.comment_audio_generator import generate_comments_with_duration
 from app.utils.reddit_comment_overlay import add_comments_to_video, write_videofile
-from app.utils.trim_video import trim_video_to_fit_comments
 from app.utils.translate import translate_comments, translate_text
+from app.utils.trim_video import trim_video_to_fit_comments
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -72,8 +72,6 @@ class VideoService:
 
                 comments = translate_comments(comments, lang)
                 logger.info(f"Translated {len(comments)} comments to {lang}")
-
-
 
             comments_json = [comment.model_dump() for comment in comments]
 
@@ -190,8 +188,12 @@ class VideoService:
             target_duration = video_info_dict["vid_len"]
             if target_duration is not None and target_duration > 90:
                 target_duration = 90
-            processed_comments, _ = generate_comments_with_duration(comments, target_duration, allow_exceed_duration=True, lang=video_info_dict["lang"], voice=video_info_dict["voice_id"])
-            video = add_comments_to_video(video, processed_comments, lang=video_info_dict["lang"], voice=video_info_dict["voice_id"])
+            processed_comments, _ = generate_comments_with_duration(comments, target_duration,
+                                                                    allow_exceed_duration=True,
+                                                                    lang=video_info_dict["lang"],
+                                                                    voice=video_info_dict["voice_id"])
+            video = add_comments_to_video(video, processed_comments, lang=video_info_dict["lang"],
+                                          voice=video_info_dict["voice_id"])
             video = trim_video_to_fit_comments(video, processed_comments)
 
             progress_logger = VideoProgLog(job_code=job_code)
