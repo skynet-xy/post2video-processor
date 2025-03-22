@@ -70,3 +70,46 @@ def translate_comments(comments: List[Comment],
         logger.error(f"Translation failed: {str(e)}", exc_info=True)
         # Return original comments if translation fails
         return comments
+
+
+def translate_text(text: str,
+                   target_language: str,
+                   credentials_path="./keys/capable-shape-452021-u9-06c66c66092c.json") -> str:
+    """
+    Translate a single text from English to target language
+
+    Args:
+        text: Text to translate
+        target_language: Target language code (e.g. 'fr-FR', 'vi-VN')
+        credentials_path: Credentials file path for Google Cloud Translation API
+
+    Returns:
+        Translated text
+    """
+
+    if target_language.startswith("en-"):
+        # No translation needed for English
+        return text
+
+    try:
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = credentials_path
+
+        # Extract just the language code (e.g. 'fr' from 'fr-FR')
+        target_lang_code = target_language.split('-')[0]
+
+        # Initialize the client
+        translate_client = translate.Client()
+
+        # Translate the text
+        translation = translate_client.translate(
+            text,
+            target_language=target_lang_code,
+            source_language='en'
+        )
+
+        return translation['translatedText']
+
+    except Exception as e:
+        logger.error(f"Translation failed: {str(e)}", exc_info=True)
+        # Return original text if translation fails
+        return text
