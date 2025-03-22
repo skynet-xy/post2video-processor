@@ -1,7 +1,6 @@
 # app/models/video.py
 from enum import Enum
-from typing import List
-from typing import Optional, Any
+from typing import Optional, Any, List, Literal
 
 from pydantic import BaseModel, Field
 
@@ -30,7 +29,10 @@ class CommentRequest(BaseModel):
         description="Language for text-to-speech. Options: en-US, fr-FR, vi-VN"
     )
     theme: Optional[str] = Field(default="dark", description="Theme for the comment overlay. Options: dark, light")
-    vid_len: Optional[int] = Field(default="90", description="Target video length in seconds. Options: 90, 60, 30")
+    vid_len: Optional[Literal[30, 60, 90]] = Field(
+        default=90,
+        description="Target video length in seconds. Options: 90, 60, 30"
+    )
     title: Optional[str] = Field(default=None, description="Title for the video")
     ratio: Optional[str] = Field(default="16:9", description="Aspect ratio of the video. Options: 16:9, 9:16")
 
