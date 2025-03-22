@@ -38,7 +38,7 @@ async def add_comments_to_video(
         background_tasks
     )
 
-@router.post("/get_output_video", response_model=ResponseMessage)
+@router.post("/get_output_video/", response_model=ResponseMessage)
 async def get_output_video(
         request: GetOutputVideoRequest
 ) -> ResponseMessage:

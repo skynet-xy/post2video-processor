@@ -136,7 +136,7 @@ class VideoService:
             async with get_db() as db:
                 db_session = db()
                 query = """
-                SELECT video_name, comments
+                SELECT video_name, comments, post_title
                 FROM job_add_reddit_comment_overlay
                 WHERE job_code = :job_code AND status = 'pending'
                 """
@@ -148,7 +148,7 @@ class VideoService:
                     logger.error(f"Job {job_code} not found or not pending")
                     return
 
-                video_name, comments_data = job
+                video_name, comments_data, post_title = job
 
                 # Update status to processing
                 await db_session.execute(
@@ -162,11 +162,23 @@ class VideoService:
             video_path = os.path.join(self.video_templates_dir, video_name)
             comments = [Comment(**comment) for comment in comments_data]
 
+            if post_title:
+                # Create a title comment object
+                title_comment = Comment(
+                    username="OP",
+                    text=post_title,
+                    start_time=0.0,
+                    duration=0.0,
+                    avatar="/avatar_default_0.png",
+                    is_title=True  # Add a flag to indicate this is a title
+                )
+                comments.insert(0, title_comment)
+
             # Process the video
             video = VideoFileClip(video_path)
             target_duration = 60.0
             processed_comments, _ = generate_comments_with_duration(comments, target_duration, allow_exceed_duration=True)
-            video = add_comments_to_video(video, processed_comments,lang=video_info_dict["lang"],voice=video_info_dict["voice_id"])
+            video = add_comments_to_video(video, processed_comments, lang=video_info_dict["lang"], voice=video_info_dict["voice_id"])
             video = trim_video_to_fit_comments(video, processed_comments)
             output_path = write_videofile(video)
             video.close()

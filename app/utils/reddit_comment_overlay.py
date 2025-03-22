@@ -86,6 +86,78 @@ def _create_reddit_comment(username, comment_text, avatar_path=None, width=500, 
     return comment_img
 
 
+def _create_reddit_title(title_text, width=800, avatar_path=None, default_avatar=None):
+    """
+    Create a Reddit post title card that looks similar to but distinct from comments
+
+    Args:
+        title_text (str): The title of the Reddit post
+        width (int): Width of the comment image
+        avatar_path (str, optional): Path to avatar image
+        default_avatar (str, optional): Path to default avatar if none provided
+
+    Returns:
+        PIL.Image: Image containing the rendered title card
+    """
+    from PIL import Image, ImageDraw, ImageFont
+    import os
+    import textwrap
+
+    # Set up fonts - make title font larger than comment font
+    font_path = os.path.join(os.path.dirname(__file__), '..', 'assets', 'fonts', 'Roboto-Regular.ttf')
+    bold_font_path = os.path.join(os.path.dirname(__file__), '..', 'assets', 'fonts', 'Roboto-Bold.ttf')
+    title_font = ImageFont.truetype(bold_font_path, 22) if os.path.exists(bold_font_path) else ImageFont.load_default()
+
+    # Avatar setup (same as comment function)
+    avatar_size = 40
+    if avatar_path and os.path.exists(avatar_path):
+        avatar = Image.open(avatar_path)
+    else:
+        # Create a default avatar if none is provided
+        avatar = Image.new('RGB', (avatar_size, avatar_size), color=(200, 200, 200))
+        if default_avatar and os.path.exists(default_avatar):
+            avatar = Image.open(default_avatar)
+
+    avatar = avatar.resize((avatar_size, avatar_size))
+
+    # Create circular mask for avatar
+    mask = Image.new('L', avatar.size, 0)
+    draw = ImageDraw.Draw(mask)
+    draw.ellipse((0, 0, avatar_size, avatar_size), fill=255)
+    avatar.putalpha(mask)
+
+    # Wrap title text to fit width
+    padding = 20
+    text_width = width - avatar_size - 3 * padding
+    wrapped_text = textwrap.fill(title_text, width=int(text_width / 7))
+
+    # Calculate the height based on wrapped text
+    lines = wrapped_text.count('\n') + 1
+    line_height = title_font.getbbox("Ay")[3] * 1.5
+    text_height = int(lines * line_height)
+
+    # Create the image with slightly different background (orangish-red for Reddit title)
+    height = max(avatar_size + 2 * padding, text_height + padding * 2) + 30  # Make title card slightly taller
+    title_img = Image.new('RGBA', (width, height), color=(36, 36, 38, 230))  # Darker background for title
+    draw = ImageDraw.Draw(title_img)
+
+    # Add a reddit post indicator bar on the left
+    draw.rectangle([(0, 0), (6, height)], fill=(255, 69, 0))  # Reddit orange
+
+    # Add avatar
+    title_img.paste(avatar, (padding, padding), avatar)
+
+    # Add "POST TITLE" indicator
+    indicator_position = (avatar_size + padding * 2, padding)
+    draw.text(indicator_position, "POST TITLE", font=ImageFont.truetype(font_path, 14), fill=(255, 69, 0))
+
+    # Add title text
+    title_position = (avatar_size + padding * 2, padding + 25)
+    draw.text(title_position, wrapped_text, font=title_font, fill=(240, 240, 245))
+
+    return title_img
+
+
 def add_comments_to_video(video, comments_data: List[Comment], lang, voice):
     """
     Add multiple comments with audio to the video
@@ -107,13 +179,22 @@ def add_comments_to_video(video, comments_data: List[Comment], lang, voice):
         audio_clips.append(video.audio)
 
     for comment in comments_data:
-        # Create comment image
-        comment_img = _create_reddit_comment(
-            username=comment.username,
-            comment_text=comment.text,
-            avatar_path=comment.avatar,
-            width=int(video.w * 0.8)  # Make comment 80% of video width
-        )
+        # Check if this is a title or regular comment
+        if hasattr(comment, 'is_title') and comment.is_title:
+            # Create title card
+            comment_img = _create_reddit_title(
+                title_text=comment.text,
+                avatar_path=comment.avatar,
+                width=int(video.w * 0.8)  # Make title 80% of video width
+            )
+        else:
+            # Create regular comment image
+            comment_img = _create_reddit_comment(
+                username=comment.username,
+                comment_text=comment.text,
+                avatar_path=comment.avatar,
+                width=int(video.w * 0.8)  # Make comment 80% of video width
+            )
 
         # Convert PIL image to numpy array
         comment_array = np.array(comment_img)

@@ -29,10 +29,10 @@ class CommentRequest(BaseModel):
         default=None,
         description="Language for text-to-speech. Options: en-US, fr-FR, vi-VN"
     )
-    theme: Optional[str] = Field(default=None, description="Theme for the comment overlay")
-    vid_len: Optional[int] = Field(default=None, description="Target video length in seconds")
+    theme: Optional[str] = Field(default=None, description="Theme for the comment overlay. Options: dark, light")
+    vid_len: Optional[int] = Field(default=None, description="Target video length in seconds. Options: 90, 60, 30")
     title: Optional[str] = Field(default=None, description="Title for the video")
-    ratio: Optional[str] = Field(default=None, description="Aspect ratio of the video (e.g. '16:9')")
+    ratio: Optional[str] = Field(default=None, description="Aspect ratio of the video. Options: 16:9, 9:16")
 
 
 class ResponseMessage(BaseModel):
