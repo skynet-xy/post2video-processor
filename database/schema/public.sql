@@ -10,7 +10,7 @@ CREATE TABLE job_add_reddit_comment_overlay (
     output_path VARCHAR(255),
     voice_id VARCHAR(255),
     language VARCHAR(255),
-    video_length VARCHAR(255),
+    video_length INTEGER,
     ratio VARCHAR(255),
     theme VARCHAR(255),
     post_title VARCHAR(255),
