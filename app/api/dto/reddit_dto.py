@@ -15,7 +15,10 @@ class Comment(BaseModel):
 
 
 class RedditCommentsRequest(BaseModel):
-    post_url: HttpUrl = Field(description="URL of the Reddit post to fetch comments from. Options: https://www.reddit.com/r/AskReddit/comments/1jh1232/which_celebrity_gives_you_i_sold_my_soul_to_the/")
+    post_url: HttpUrl = Field(
+        default="https://www.reddit.com/r/AskReddit/comments/1jh1232/which_celebrity_gives_you_i_sold_my_soul_to_the/",
+        description="URL of the Reddit post to fetch comments from"
+    )
     limit: int = 10
 
 
