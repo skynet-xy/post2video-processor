@@ -1,7 +1,7 @@
 import os
 from typing import List
 from logging import getLogger
-
+import html
 # Import the Comment class from your models
 from app.api.dto.video_dto import Comment
 # Set up logger
@@ -53,7 +53,7 @@ def translate_comments(comments: List[Comment],
             # Create a copy of the comment with translated text
             translated_comment = Comment(
                 username=comment.username,
-                text=translation['translatedText'],
+                text=html.unescape(translation['translatedText']),
                 start_time=comment.start_time,
                 duration=comment.duration,
                 avatar=comment.avatar
@@ -107,7 +107,10 @@ def translate_text(text: str,
             source_language='en'
         )
 
-        return translation['translatedText']
+        # Decode HTML entities in the translated text
+        translated_text = html.unescape(translation['translatedText'])
+
+        return translated_text
 
     except Exception as e:
         logger.error(f"Translation failed: {str(e)}", exc_info=True)
