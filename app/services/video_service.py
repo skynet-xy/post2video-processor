@@ -16,6 +16,7 @@ from app.db.session import get_db
 from app.utils.comment_audio_generator import generate_comments_with_duration
 from app.utils.reddit_comment_overlay import add_comments_to_video, write_videofile
 from app.utils.trim_video import trim_video_to_fit_comments
+from app.utils.translate import translate_comments
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -64,6 +65,10 @@ class VideoService:
             video_name = os.path.basename(video_path)
 
             # Serialize comments to JSON
+            if lang != "en-US":
+                comments = translate_comments(comments, lang)
+                logger.info(f"Translated {len(comments)} comments to {lang}")
+
             comments_json = [comment.model_dump() for comment in comments]
 
             voice_id_dict = {
