@@ -33,9 +33,15 @@ async def add_comments_to_video(
         raise HTTPException(status_code=404, detail="Video file not found")
 
     return await video_service.create_add_comments_to_video_job(
-        video_path,
-        request.comments,
-        background_tasks
+        video_path=video_path,
+        comments=request.comments,
+        background_tasks=background_tasks,
+        voice_gender=request.voice_gender,
+        lang=request.lang,
+        vid_len=request.vid_len,
+        ratio=request.ratio,
+        theme=request.theme,
+        title=request.title
     )
 
 @router.post("/get_output_video/", response_model=ResponseMessage)
