@@ -16,3 +16,4 @@ asyncpraw
 sqlalchemy
 asyncpg
 redis
+gunicorn

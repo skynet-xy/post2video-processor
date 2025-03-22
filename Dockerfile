@@ -15,10 +15,16 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY run.py .
+# Development
+#COPY run.py .
+# Production
+COPY gunicorn_conf.py .
 
 # Expose the port FastAPI runs on
 EXPOSE 8000
 
 # Command to run the application
-CMD ["python", "run.py"]
+# Development
+#CMD ["python", "run.py"]
+# Production
+CMD ["gunicorn", "app.main:app", "-c", "gunicorn_conf.py"]
