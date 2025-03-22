@@ -86,13 +86,15 @@ def _create_reddit_comment(username, comment_text, avatar_path=None, width=500, 
     return comment_img
 
 
-def add_comments_to_video(video, comments_data: List[Comment]):
+def add_comments_to_video(video, comments_data: List[Comment], lang, voice):
     """
     Add multiple comments with audio to the video
 
     Args:
         video (VideoFileClip): The original video
         comments_data (list): List of Comment
+        lang (str): language code (e.g., 'en-US')
+        voice (str): voice name (e.g., 'en-US-Standard-D')
 
     Returns:
         CompositeVideoClip: The final video with comments added
@@ -132,7 +134,7 @@ def add_comments_to_video(video, comments_data: List[Comment]):
         video_clips.append(img_clip)
 
         # Generate and add audio for this comment
-        audio_clip, _ = generate_comment_audio(comment)
+        audio_clip, _ = generate_comment_audio(comment, lang, voice)
         audio_clip = audio_clip.set_start(comment.start_time)
         audio_clips.append(audio_clip)
 

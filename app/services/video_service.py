@@ -4,7 +4,7 @@ import logging
 import os
 import random
 import uuid
-from typing import List, Tuple, Dict, Any
+from typing import List, Tuple, Dict, Any, Optional
 
 import yt_dlp as youtube_dl
 from fastapi import HTTPException, BackgroundTasks
@@ -31,7 +31,13 @@ class VideoService:
             self,
             video_path: str,
             comments: List[Comment],
-            background_tasks: BackgroundTasks = None
+            background_tasks: BackgroundTasks = None,
+            voice_gender: Optional[str] = None,
+            lang: Optional[str] = None,
+            vid_len: Optional[int] = None,
+            ratio: Optional[str] = None,
+            theme: Optional[str] = None,
+            title: Optional[str] = None
     ) -> ResponseMessage:
         """
         Create a job to add comments to a video and process it in the background.
@@ -40,6 +46,12 @@ class VideoService:
             video_path: Path to the video file
             comments: List of Comment objects with text and timing info
             background_tasks: BackgroundTasks object for running tasks asynchronously
+            voice_gender: male or female
+            lang: Language for text-to-speech
+            vid_len: Length of the video in seconds
+            ratio: Aspect ratio of the video
+            theme: Theme for the video overlay
+            title: Title of the video
 
         Returns:
             ResponseMessage indicating success/failure
@@ -54,6 +66,29 @@ class VideoService:
             # Serialize comments to JSON
             comments_json = [comment.model_dump() for comment in comments]
 
+            voice_id_dict = {
+                "en-US_male": "en-US-Standard-B",
+                "en-US_female": "en-US-Standard-F",
+                "fr-FR_male": "fr-FR-Standard-B",
+                "fr-FR_female": "fr-FR-Standard-F",
+                "vi-VN_male": "vi-VN-Chirp3-HD-Orus",
+                "vi-VN_female": "vi-VN-Chirp3-HD-Aoede",
+            }
+            voice_id = voice_id_dict[f"{lang}_{voice_gender}"]
+
+            video_info_dict = {
+                "job_code": job_code,
+                "status": "pending",
+                "video_name": video_name,
+                "comments": json.dumps(comments_json),
+                "voice_id": voice_id,
+                "lang": lang,
+                "vid_len": vid_len,
+                "ratio": ratio,
+                "theme": theme,
+                "title": title
+            }
+
             # Get database session
             async with get_db() as db:
                 db_session = db()
@@ -61,28 +96,22 @@ class VideoService:
                 # Create job record
                 query = """
                 INSERT INTO job_add_reddit_comment_overlay
-                (job_code, status, video_name, comments)
-                VALUES (:job_code, :status, :video_name, :comments)
+                (job_code, status, video_name, comments, voice_id, lang, vid_len, ratio, theme, title)
+                VALUES (:job_code, :status, :video_name, :comments, :voice_id, :language, :video_length, :ratio, :theme, :post_title)
                 """
 
                 await db_session.execute(
-                    text(query),
-                    {
-                        "job_code": job_code,
-                        "status": "pending",
-                        "video_name": video_name,
-                        "comments": json.dumps(comments_json)
-                    }
+                    text(query), video_info_dict
                 )
 
                 await db_session.commit()
 
             # Start the background task to process the job
             if background_tasks:
-                background_tasks.add_task(self.process_video_job, job_code)
+                background_tasks.add_task(self.process_video_job, video_info_dict)
             else:
                 # Start processing in the background without using BackgroundTasks
-                asyncio.create_task(self.process_video_job(job_code))
+                asyncio.create_task(self.process_video_job(video_info_dict))
 
             return ResponseMessage(
                 success=True,
@@ -97,11 +126,12 @@ class VideoService:
                 detail=f"Error creating video comment job: {str(e)}"
             )
 
-    async def process_video_job(self, job_code: str):
+    async def process_video_job(self, video_info_dict: dict):
         """
         Process a video job in the background.
         """
         try:
+            job_code = video_info_dict["job_code"]
             # Get job details from database
             async with get_db() as db:
                 db_session = db()
@@ -135,9 +165,8 @@ class VideoService:
             # Process the video
             video = VideoFileClip(video_path)
             target_duration = 60.0
-            processed_comments, _ = generate_comments_with_duration(comments, target_duration,
-                                                                    allow_exceed_duration=True)
-            video = add_comments_to_video(video, processed_comments)
+            processed_comments, _ = generate_comments_with_duration(comments, target_duration, allow_exceed_duration=True)
+            video = add_comments_to_video(video, processed_comments,lang=video_info_dict["lang"],voice=video_info_dict["voice_id"])
             video = trim_video_to_fit_comments(video, processed_comments)
             output_path = write_videofile(video)
             video.close()
@@ -182,8 +211,7 @@ class VideoService:
             except Exception as update_error:
                 logger.error(f"Failed to update job status to failed: {str(update_error)}", exc_info=True)
 
-    async def download_youtube_video(self, url: str, height=720, output_path=None, max_retries=3) -> Tuple[
-        str, Dict[str, Any]]:
+    async def download_youtube_video(self, url: str, height=720, output_path=None, max_retries=3) -> Tuple[str, Dict[str, Any]]:
         if not output_path:
             output_path = self.output_dir
 

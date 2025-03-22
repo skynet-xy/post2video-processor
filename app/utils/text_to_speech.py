@@ -22,6 +22,7 @@ def generate_audio_from_text(text, language_code="en-US", voice_name="en-US-Stan
         speaking_rate (float): Speed of speech (1.0 is normal)
         pitch (float): Voice pitch (-20.0 to 20.0)
         credentials_path (str): Path to Google Cloud credentials
+        output_dir (str):
 
     Returns:
         str: Path to audio file
@@ -76,11 +77,13 @@ def generate_audio_from_text(text, language_code="en-US", voice_name="en-US-Stan
     return output_file
 
 
-def generate_comment_audio(comment: Comment):
+def generate_comment_audio(comment: Comment, language="en-US", voice="en-US-Standard-D"):
     """Generate audio for a comment using text-to-speech.
 
     Args:
         comment (dict): Comment data including 'text'
+        language (str): language code (e.g., 'en-US')
+        voice (str): voice name (e.g., 'en-US-Standard-D')
 
     Returns:
         tuple: (audio_clip, audio_path)
@@ -89,6 +92,8 @@ def generate_comment_audio(comment: Comment):
     # Generate the audio file
     audio_path = generate_audio_from_text(
         text=comment.text,
+        language_code=language,
+        voice_name=voice,
         speaking_rate=1.0
     )
 
