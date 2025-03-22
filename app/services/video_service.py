@@ -176,7 +176,7 @@ class VideoService:
 
             # Process the video
             video = VideoFileClip(video_path)
-            target_duration = 60.0
+            target_duration = video_info_dict["vid_len"]
             processed_comments, _ = generate_comments_with_duration(comments, target_duration, allow_exceed_duration=True)
             video = add_comments_to_video(video, processed_comments, lang=video_info_dict["lang"], voice=video_info_dict["voice_id"])
             video = trim_video_to_fit_comments(video, processed_comments)
