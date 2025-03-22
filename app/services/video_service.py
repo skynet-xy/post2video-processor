@@ -96,8 +96,8 @@ class VideoService:
                 # Create job record
                 query = """
                 INSERT INTO job_add_reddit_comment_overlay
-                (job_code, status, video_name, comments, voice_id, lang, vid_len, ratio, theme, title)
-                VALUES (:job_code, :status, :video_name, :comments, :voice_id, :language, :video_length, :ratio, :theme, :post_title)
+                (job_code, status, video_name, comments, voice_id, language, video_length, ratio, theme, post_title)
+                VALUES (:job_code, :status, :video_name, :comments, :voice_id, :lang, :vid_len, :ratio, :theme, :title)
                 """
 
                 await db_session.execute(
