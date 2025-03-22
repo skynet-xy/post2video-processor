@@ -6,6 +6,9 @@ from app.api.deps import get_video_service
 from app.api.dto.video_dto import CommentRequest, ResponseMessage
 from app.core.config import settings
 from app.services.video_service import VideoService
+from app.api.dto.reddit_job_dto import GetOutputVideoRequest
+from app.db.session import get_db
+from sqlalchemy import text
 
 router = APIRouter(prefix="/video", tags=["Video Operations"])
 
@@ -34,3 +37,41 @@ async def add_comments_to_video(
         request.comments,
         background_tasks
     )
+
+@router.post("/get_output_video", response_model=ResponseMessage)
+async def get_output_video(
+        request: GetOutputVideoRequest
+) -> ResponseMessage:
+    """Get the output video path for a specific job."""
+    try:
+        async with get_db() as db:
+            db_session = db()
+            query = """
+            SELECT output_path 
+            FROM job_add_reddit_comment_overlay
+            WHERE job_code = :job_code
+            """
+            result = await db_session.execute(text(query), {"job_code": request.job_code})
+            job = result.fetchone()
+
+            if not job or not job[0]:
+                return ResponseMessage(
+                    success=False,
+                    message=f"No output video found for job code: {request.job_code}",
+                    data=None
+                )
+
+            return ResponseMessage(
+                success=True,
+                message="Output video found",
+                data={
+                    "job_code": request.job_code,
+                    "output_path": job[0]
+                }
+            )
+    except Exception as e:
+        return ResponseMessage(
+            success=False,
+            message=f"Error retrieving output video path: {str(e)}",
+            data=None
+        )
