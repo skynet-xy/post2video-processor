@@ -41,7 +41,6 @@ services:
       postgres:
         condition: service_healthy
     working_dir: /schema
-
   atlas-triggers:
     image: postgres:17-alpine
     volumes:
@@ -50,3 +49,13 @@ services:
     depends_on:
       atlas:
         condition: service_completed_successfully
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    command: redis-server
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5

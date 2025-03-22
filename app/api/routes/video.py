@@ -1,14 +1,14 @@
 import os
 
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from sqlalchemy import text
 
 from app.api.deps import get_video_service
-from app.api.dto.video_dto import CommentRequest, ResponseMessage
-from app.core.config import settings
-from app.services.video_service import VideoService
 from app.api.dto.reddit_job_dto import GetOutputVideoRequest
+from app.api.dto.video_dto import CommentRequest, ResponseMessage, JobStatusResponse
+from app.core.config import settings
 from app.db.session import get_db
-from sqlalchemy import text
+from app.services.video_service import VideoService
 
 router = APIRouter(prefix="/video", tags=["Video Operations"])
 
@@ -81,3 +81,7 @@ async def get_output_video(
             message=f"Error retrieving output video path: {str(e)}",
             data=None
         )
+@router.post("/status/{job_id}")
+async def get_job_status(job_id: str, video_service: VideoService = Depends(get_video_service)) -> JobStatusResponse:
+    """Get the status of a video processing job."""
+    return await video_service.get_job_status(job_id)

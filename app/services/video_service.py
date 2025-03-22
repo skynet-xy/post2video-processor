@@ -11,8 +11,9 @@ from fastapi import HTTPException, BackgroundTasks
 from moviepy.editor import VideoFileClip
 from sqlalchemy import text
 
-from app.api.dto.video_dto import Comment, ResponseMessage
+from app.api.dto.video_dto import Comment, ResponseMessage, JobStatusResponse
 from app.db.session import get_db
+from app.services.video.video_proglog import VideoProgLog
 from app.utils.comment_audio_generator import generate_comments_with_duration
 from app.utils.reddit_comment_overlay import add_comments_to_video, write_videofile
 from app.utils.trim_video import trim_video_to_fit_comments
@@ -118,10 +119,10 @@ class VideoService:
 
             # Start the background task to process the job
             if background_tasks:
-                background_tasks.add_task(self.process_video_job, video_info_dict)
+                background_tasks.add_task(self._process_video_job, video_info_dict)
             else:
                 # Start processing in the background without using BackgroundTasks
-                asyncio.create_task(self.process_video_job(video_info_dict))
+                asyncio.create_task(self._process_video_job(video_info_dict))
 
             return ResponseMessage(
                 success=True,
@@ -136,7 +137,7 @@ class VideoService:
                 detail=f"Error creating video comment job: {str(e)}"
             )
 
-    async def process_video_job(self, video_info_dict: dict):
+    async def _process_video_job(self, video_info_dict: dict):
         """
         Process a video job in the background.
         """
@@ -192,7 +193,9 @@ class VideoService:
             processed_comments, _ = generate_comments_with_duration(comments, target_duration, allow_exceed_duration=True, lang=video_info_dict["lang"], voice=video_info_dict["voice_id"])
             video = add_comments_to_video(video, processed_comments, lang=video_info_dict["lang"], voice=video_info_dict["voice_id"])
             video = trim_video_to_fit_comments(video, processed_comments)
-            output_path = write_videofile(video)
+
+            progress_logger = VideoProgLog(job_code=job_code)
+            output_path = write_videofile(video, progress_callback=progress_logger)
             video.close()
 
             logger.info(f"Video processing completed, output path: {output_path}")
@@ -235,7 +238,60 @@ class VideoService:
             except Exception as update_error:
                 logger.error(f"Failed to update job status to failed: {str(update_error)}", exc_info=True)
 
-    async def download_youtube_video(self, url: str, height=720, output_path=None, max_retries=3) -> Tuple[str, Dict[str, Any]]:
+    async def get_job_status(self, job_code: str) -> JobStatusResponse:
+        """Get the status of a video processing job."""
+        try:
+            # First get job details from database
+            async with get_db() as db:
+                db_session = db()
+                query = """
+                SELECT status, error_message, output_path
+                FROM job_add_reddit_comment_overlay
+                WHERE job_code = :job_code
+                """
+                result = await db_session.execute(text(query), {"job_code": job_code})
+                job = result.fetchone()
+
+                if not job:
+                    return JobStatusResponse(
+                        job_code=job_code,
+                        success=False,
+                        message=f"Job with code {job_code} not found",
+                    )
+
+                status, error_message, output_path = job
+
+            # Get progress from Redis if job is processing
+            progress = 0
+            if status == "completed":
+                try:
+                    from app.db.redis import get_redis
+                    async with get_redis() as redis_client:
+                        key = f"video_progress:{job_code}"
+                        progress_str = await redis_client.get(key)
+
+                        if progress_str:
+                            progress = float(progress_str)
+                except Exception as e:
+                    logger.error(f"Error getting progress from Redis: {str(e)}")
+
+            return JobStatusResponse(
+                job_code=job_code,
+                success=True,
+                status=status,
+                message="Job status retrieved",
+                percentage=progress.__ceil__(),
+            )
+        except Exception as e:
+            logger.error(f"Error getting job status: {str(e)}", exc_info=True)
+            return JobStatusResponse(
+                job_code=job_code,
+                success=False,
+                message=f"Error getting job status: {str(e)}",
+            )
+
+    async def download_youtube_video(self, url: str, height=720, output_path=None, max_retries=3) -> Tuple[
+        str, Dict[str, Any]]:
         if not output_path:
             output_path = self.output_dir
 

@@ -41,3 +41,10 @@ class ResponseMessage(BaseModel):
     success: bool
     message: str
     data: Optional[Any] = None
+
+class JobStatusResponse(BaseModel):
+    job_code: str
+    success: bool
+    message: str
+    status: str = 'error'
+    percentage: int = 0

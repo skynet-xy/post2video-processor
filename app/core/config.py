@@ -44,6 +44,12 @@ class Settings(BaseSettings):
     DB_PORT: str = "5432"
     DB_NAME: str = "app"
 
+    # Redis settings
+    REDIS_HOST: str = "redis"
+    REDIS_PORT: str = "6379"
+    REDIS_PASSWORD: str = ""  # No password set in docker-compose
+    REDIS_DB: int = 0
+
     class Config:
         case_sensitive = True
         env_file = ".env"

@@ -229,7 +229,7 @@ def add_comments_to_video(video, comments_data: List[Comment], lang, voice):
     return final_video
 
 
-def write_videofile(video, output_dir= None, codec='libx264', cache_dir=None):
+def write_videofile(video, output_dir=None, codec='libx264', cache_dir=None, progress_callback=None):
     """
     Write the video to a file with a unique filename in the specified directory
 
@@ -238,11 +238,11 @@ def write_videofile(video, output_dir= None, codec='libx264', cache_dir=None):
         output_dir (str): Directory where to save the output video
         codec (str): Video codec to use
         cache_dir (str, optional): Directory for temporary cache files
+        progress_callback (callable, optional): Function to receive progress updates (0-100)
 
     Returns:
         str: Path to the output video
     """
-
     if cache_dir is None:
         cache_dir = settings.CACHE_DIR
 
@@ -262,8 +262,13 @@ def write_videofile(video, output_dir= None, codec='libx264', cache_dir=None):
     # Create path for temporary audio file in cache directory
     temp_audio_path = os.path.join(cache_dir, f"{filename}_TEMP_MPY_wvf_snd.mp3")
 
-    # Use the temp_audiofile parameter to specify where the temp file should go
-    video.write_videofile(output_path, codec=codec, temp_audiofile=temp_audio_path)
+    # Use the progress_logger with write_videofile
+    video.write_videofile(
+        output_path,
+        codec=codec,
+        temp_audiofile=temp_audio_path,
+        logger=progress_callback
+    )
 
     # Clean up temporary audio file
     if os.path.exists(temp_audio_path):
