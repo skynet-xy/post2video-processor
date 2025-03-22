@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy import text
 
 from app.api.deps import get_video_service
-from app.api.dto.reddit_job_dto import GetOutputVideoRequest
 from app.api.dto.video_dto import CommentRequest, ResponseMessage, JobStatusResponse
 from app.core.config import settings
 from app.db.session import get_db
@@ -44,10 +43,8 @@ async def add_comments_to_video(
         title=request.title
     )
 
-@router.post("/get_output_video/", response_model=ResponseMessage)
-async def get_output_video(
-        request: GetOutputVideoRequest
-) -> ResponseMessage:
+@router.get("/get_output_video/{job_code}", response_model=ResponseMessage)
+async def get_output_video(job_code: str) -> ResponseMessage:
     """Get the output video path for a specific job."""
     try:
         async with get_db() as db:
@@ -57,13 +54,13 @@ async def get_output_video(
             FROM job_add_reddit_comment_overlay
             WHERE job_code = :job_code
             """
-            result = await db_session.execute(text(query), {"job_code": request.job_code})
+            result = await db_session.execute(text(query), {"job_code": job_code})
             job = result.fetchone()
 
             if not job or not job[0]:
                 return ResponseMessage(
                     success=False,
-                    message=f"No output video found for job code: {request.job_code}",
+                    message=f"No output video found for job code: {job_code}",
                     data=None
                 )
 
@@ -71,7 +68,7 @@ async def get_output_video(
                 success=True,
                 message=f"Output video found",
                 data={
-                    "job_code": request.job_code,
+                    "job_code": job_code,
                     "output_path": f"post2video.kybiu.com/static/output/{job[0].split("/")[-1]}"
                 }
             )
@@ -81,7 +78,7 @@ async def get_output_video(
             message=f"Error retrieving output video path: {str(e)}",
             data=None
         )
-@router.post("/status/{job_id}")
-async def get_job_status(job_id: str, video_service: VideoService = Depends(get_video_service)) -> JobStatusResponse:
+@router.post("/status/{job_code}")
+async def get_job_status(job_code: str, video_service: VideoService = Depends(get_video_service)) -> JobStatusResponse:
     """Get the status of a video processing job."""
-    return await video_service.get_job_status(job_id)
+    return await video_service.get_job_status(job_code)
