@@ -19,13 +19,15 @@ async def add_comments_to_video(
         video_service: VideoService = Depends(get_video_service)
 ) -> ResponseMessage:
     """Add comments to a video file."""
-    if not request.video_name and not request.youtube_url:
-        raise HTTPException(status_code=400, detail="Either video_name or youtube_url must be provided")
+    # if not request.video_name and not request.youtube_url:
+    #     raise HTTPException(status_code=400, detail="Either video_name or youtube_url must be provided")
+    #
+    # if request.youtube_url:
+    #     video_path, _ = await video_service.download_youtube_video(request.youtube_url, height=720)
+    # else:
+    #     video_path = os.path.join(settings.VIDEO_TEMPLATES_DIR, request.video_name)
 
-    if request.youtube_url:
-        video_path, _ = await video_service.download_youtube_video(request.youtube_url, height=720)
-    else:
-        video_path = os.path.join(settings.VIDEO_TEMPLATES_DIR, request.video_name)
+    video_path = os.path.join(settings.VIDEO_TEMPLATES_DIR, request.video_name)
 
     # Validate video path exists
     if not os.path.exists(video_path):
