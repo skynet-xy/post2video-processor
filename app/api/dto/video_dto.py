@@ -21,12 +21,12 @@ class CommentRequest(BaseModel):
     youtube_url: str = Field(default='', description="URL of YouTube video to download")
     video_name: str = Field(default='', description="Name of template video to use")
     comments: List[Comment] = Field(description="List of comments to overlay on the video")
-    voice_gender: Optional[Gender] = Field(
-        default=None,
+    voice_gender: Optional[str] = Field(
+        default="male",
         description="Voice to use for text-to-speech. Options: male, female"
     )
-    lang: Optional[Language] = Field(
-        default=None,
+    lang: Optional[str] = Field(
+        default="en-US",
         description="Language for text-to-speech. Options: en-US, fr-FR, vi-VN"
     )
     theme: Optional[str] = Field(default="dark", description="Theme for the comment overlay. Options: dark, light")
