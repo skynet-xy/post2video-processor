@@ -69,7 +69,7 @@ async def get_output_video(
 
             return ResponseMessage(
                 success=True,
-                message="Output video found",
+                message=f"Output video found. Link: post2video.kybiu.com/static/output/{job[0].split("/")[-1]}",
                 data={
                     "job_code": request.job_code,
                     "output_path": job[0]
