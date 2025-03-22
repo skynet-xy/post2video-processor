@@ -41,3 +41,12 @@ services:
       postgres:
         condition: service_healthy
     working_dir: /schema
+
+  atlas-triggers:
+    image: postgres:17-alpine
+    volumes:
+      - ./database/schema:/schema
+    command: psql "postgresql://app:1@postgres:5432/app" -f /schema/triggers.sql
+    depends_on:
+      atlas:
+        condition: service_completed_successfully
