@@ -8,3 +8,4 @@ assets/
 input/
 generated/
 cache/
+.env

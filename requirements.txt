@@ -15,4 +15,5 @@ python-multipart
 asyncpraw
 sqlalchemy
 asyncpg
+boto3
 redis

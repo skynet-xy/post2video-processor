@@ -1,5 +1,6 @@
 stages:
   - mirror
+  - deploy
 
 # Stage to mirror the repository to GitHub
 sync_to_github:
@@ -18,3 +19,29 @@ sync_to_github:
     - branches
     - tags
 
+
+deploy:
+  stage: deploy
+  variables:
+    PROJECT_PATH: /home/ducan/srv/post2video-processor
+
+  before_script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval $(ssh-agent -s)
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+
+  script:
+    - |
+      ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "
+        cd $PROJECT_PATH && 
+        git fetch --all && 
+        git checkout $CI_COMMIT_REF_NAME && 
+        git pull origin $CI_COMMIT_REF_NAME &&
+        bash deploy.sh
+      "
+  only:
+    - main
+    - release
