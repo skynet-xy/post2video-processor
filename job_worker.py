@@ -53,12 +53,9 @@ async def start_video_worker():
                         WHERE job_code = :job_code AND status = 'pending'
                         """
                         result = await db_session.execute(text(query), {"job_code": job_code})
-                        job = result.fetchone()
+                        job_dict = result.fetchone()
 
-                        if job:
-                            # Convert row to dict for processing
-                            job_dict = dict(job)
-
+                        if job_dict:
                             # Update status to processing before actual processing
                             await db_session.execute(
                                 text("""
