@@ -53,10 +53,13 @@ async def start_video_worker():
                         WHERE job_code = :job_code AND status = 'pending'
                         """
                         result = await db_session.execute(text(query), {"job_code": job_code})
-                        job_dict = result.fetchone()
 
-                        if job_dict:
-                            # Update status to processing before actual processing
+                        job = result.fetchone()
+                        if job:
+                            # Get column names
+                            columns = result.keys()
+                            # Create dictionary mapping column names to values
+                            job_dict = {columns[i]: value for i, value in enumerate(job)}                            # Update status to processing before actual processing
                             await db_session.execute(
                                 text("""
                                 UPDATE job_add_reddit_comment_overlay 
