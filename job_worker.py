@@ -42,7 +42,6 @@ async def start_video_worker():
                 if result:
                     # Extract job code from result tuple (key, value)
                     _, job_code = result
-                    job_code = job_code.decode('utf-8')
 
                     logger.info(f"Received job code: {job_code} from queue")
 
