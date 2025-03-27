@@ -1,10 +1,9 @@
 stages:
-  - mirror
-  - deploy
+  - parallel_execution
 
-# Stage to mirror the repository to GitHub
+# Mirror job now in the same stage as deploy
 sync_to_github:
-  stage: mirror
+  stage: parallel_execution
   script:
     - git remote add github https://oauth2:${GITHUB_TOKEN}@github.com/skynet-xy/post2video-processor.git
     - git fetch --all
@@ -14,17 +13,16 @@ sync_to_github:
         branch_name=$(echo $branch | sed 's/origin\///');
         git push --force github $branch:refs/heads/$branch_name;
       done
-    - git push --force --tags github  # Push tags if any
+    - git push --force --tags github
   only:
     - branches
     - tags
 
-
+# Deploy job now in the same stage
 deploy:
-  stage: deploy
+  stage: parallel_execution
   variables:
     PROJECT_PATH: /home/ducan/srv/post2video-processor
-
   before_script:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)
@@ -32,13 +30,12 @@ deploy:
     - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
     - chmod 600 ~/.ssh/id_rsa
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
-
   script:
     - |
       ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "
-        cd $PROJECT_PATH && 
-        git fetch --all && 
-        git checkout $CI_COMMIT_REF_NAME && 
+        cd $PROJECT_PATH &&
+        git fetch --all &&
+        git checkout $CI_COMMIT_REF_NAME &&
         git pull origin $CI_COMMIT_REF_NAME &&
         bash deploy.sh
       "
