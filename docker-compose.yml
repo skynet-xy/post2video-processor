@@ -1,7 +1,6 @@
 services:
   app:
     build: .
-    container_name: reddit-comment-overlay-service
     ports:
       - "8000:8000"
     volumes:
@@ -11,6 +10,27 @@ services:
       - ./keys:/app/keys
     environment:
       - PYTHONUNBUFFERED=1
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+  worker:
+    build: .
+    volumes:
+      - ./generated:/app/generated
+      - ./assets:/app/assets
+      - ./app:/app/app
+      - ./keys:/app/keys
+    command: python -u job_worker.py
+    environment:
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
   postgres:
     image: postgres:17-alpine
     environment:

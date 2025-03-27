@@ -12,6 +12,7 @@ from moviepy.editor import VideoFileClip
 from sqlalchemy import text
 
 from app.api.dto.video_dto import Comment, ResponseMessage, JobStatusResponse
+from app.db.redis import get_redis
 from app.db.session import get_db
 from app.services.video.video_proglog import VideoProgLog
 from app.utils.comment_audio_generator import generate_comments_with_duration
@@ -115,12 +116,10 @@ class VideoService:
 
                 await db_session.commit()
 
-            # Start the background task to process the job
-            if background_tasks:
-                background_tasks.add_task(self._process_video_job, video_info_dict)
-            else:
-                # Start processing in the background without using BackgroundTasks
-                asyncio.create_task(self._process_video_job(video_info_dict))
+            # Instead of starting a background task, publish to Redis
+            async with get_redis() as redis_client:
+                await redis_client.lpush("video_processing_queue", job_code)
+                logger.info(f"Added job {job_code} to Redis processing queue")
 
             return ResponseMessage(
                 success=True,
@@ -135,7 +134,7 @@ class VideoService:
                 detail=f"Error creating video comment job: {str(e)}"
             )
 
-    async def _process_video_job(self, video_info_dict: dict):
+    async def process_video_job(self, video_info_dict: dict):
         """
         Process a video job in the background.
         """

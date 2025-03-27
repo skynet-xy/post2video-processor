@@ -16,6 +16,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY run.py .
+COPY job_worker.py .
 
 # Expose the port FastAPI runs on
 EXPOSE 8000
