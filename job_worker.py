@@ -56,10 +56,7 @@ async def start_video_worker():
 
                         job = result.fetchone()
                         if job:
-                            # Get column names
-                            columns = result.keys()
-                            # Create dictionary mapping column names to values
-                            job_dict = {columns[i]: value for i, value in enumerate(job)}                            # Update status to processing before actual processing
+                            job_dict = dict(zip(result.keys(), job))
                             await db_session.execute(
                                 text("""
                                 UPDATE job_add_reddit_comment_overlay 
