@@ -57,17 +57,6 @@ async def start_video_worker():
                         job = result.fetchone()
                         if job:
                             job_dict = dict(zip(result.keys(), job))
-                            await db_session.execute(
-                                text("""
-                                UPDATE job_add_reddit_comment_overlay 
-                                SET status = 'processing' 
-                                WHERE job_code = :job_code
-                                """),
-                                {"job_code": job_code}
-                            )
-                            await db_session.commit()
-                            logger.info(f"Updated job {job_code} to processing status")
-
                             # Process the job
                             await video_service.process_video_job(job_dict)
                         else:
