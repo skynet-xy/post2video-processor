@@ -28,11 +28,13 @@ class RedditService:
             text = comment.body
             # Use Reddit's default avatar as a placeholder
             avatar = "/avatar_default_0.png"
+            comment_upvotes = comment.score
 
             comments.append(Comment(
                 username=username,
                 text=text,
-                avatar=avatar
+                avatar=avatar,
+                upvotes=comment_upvotes
             ))
 
         await reddit.close()  # Important to close the connection when done
