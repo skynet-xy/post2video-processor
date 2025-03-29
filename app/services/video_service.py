@@ -261,15 +261,15 @@ class VideoService:
                     )
 
                 status, error_message, output_path = job
-
             # Get progress from Redis if job is processing
             progress = 0
-            if status == "completed":
+            if status == "processing":
                 try:
                     from app.db.redis import get_redis
                     async with get_redis() as redis_client:
                         key = f"video_progress:{job_code}"
                         progress_str = await redis_client.get(key)
+                        print(f"Progress from Redis {key}: {progress_str}")
 
                         if progress_str:
                             progress = float(progress_str)
