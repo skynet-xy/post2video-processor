@@ -1,6 +1,6 @@
 # app/models/video.py
 from enum import Enum
-from typing import Optional, Any, List, Literal
+from typing import Optional, Any, List, Literal, Dict
 
 from pydantic import BaseModel, Field
 
@@ -48,3 +48,6 @@ class JobStatusResponse(BaseModel):
     message: str
     status: str = 'error'
     percentage: int = 0
+
+class LanguagesResponse(BaseModel):
+    languages: List[Dict[str, str]]

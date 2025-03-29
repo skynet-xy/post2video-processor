@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy import text
 
 from app.api.deps import get_video_service
-from app.api.dto.video_dto import CommentRequest, ResponseMessage, JobStatusResponse
+from app.api.dto.video_dto import CommentRequest, ResponseMessage, JobStatusResponse, LanguagesResponse, Language
 from app.core.config import settings
 from app.db.session import get_db
 from app.services.video_service import VideoService
@@ -84,3 +84,13 @@ async def get_output_video(job_code: str) -> ResponseMessage:
 async def get_job_status(job_code: str, video_service: VideoService = Depends(get_video_service)) -> JobStatusResponse:
     """Get the status of a video processing job."""
     return await video_service.get_job_status(job_code)
+
+
+@router.get("/supported-languages/", response_model=LanguagesResponse)
+async def get_supported_languages() -> LanguagesResponse:
+    """Get all supported languages for text-to-speech."""
+    languages = [
+        {"code": lang.value, "name": lang.name}
+        for lang in Language
+    ]
+    return LanguagesResponse(languages=languages)
