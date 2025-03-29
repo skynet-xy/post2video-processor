@@ -1,6 +1,6 @@
 import os
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator, Callable
+from typing import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.pool import NullPool
@@ -33,25 +33,26 @@ async_session_maker = async_sessionmaker(
     autoflush=False,
 )
 
+
 # Context manager to get a database session
 @asynccontextmanager
-async def get_db() -> AsyncGenerator[Callable[[], AsyncSession], None]:
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """
-    Get a database session factory.
+    Context manager to get and automatically close a database session.
 
-    This function is used as a context manager to get a database session factory.
     Example:
-        async with get_db() as db:
-            db_session = db()  # Creates a new session
-            # Use db_session here
+        async with get_db() as session:
+            # Use session here
 
     Returns:
-        AsyncGenerator yielding a function that creates a new AsyncSession
+        AsyncGenerator yielding an AsyncSession
     """
+    session = async_session_maker()
     try:
-        yield async_session_maker
+        yield session
     finally:
-        pass  # Session cleanup happens when session object goes out of scope
+        await session.close()
+
 
 async def close_db_connections():
     """Close all database connections."""

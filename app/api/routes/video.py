@@ -49,8 +49,7 @@ async def add_comments_to_video(
 async def get_output_video(job_code: str) -> ResponseMessage:
     """Get the output video path for a specific job."""
     try:
-        async with get_db() as db:
-            db_session = db()
+        async with get_db() as db_session:
             query = """
             SELECT output_path 
             FROM job_add_reddit_comment_overlay

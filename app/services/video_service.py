@@ -100,9 +100,7 @@ class VideoService:
             }
 
             # Get database session
-            async with get_db() as db:
-                db_session = db()
-
+            async with get_db() as db_session:
                 # Create job record
                 query = """
                 INSERT INTO job_add_reddit_comment_overlay
@@ -141,8 +139,7 @@ class VideoService:
         try:
             job_code = video_info_dict["job_code"]
             # Get job details from database
-            async with get_db() as db:
-                db_session = db()
+            async with get_db() as db_session:
                 query = """
                 SELECT video_name, comments, post_title
                 FROM job_add_reddit_comment_overlay
@@ -203,8 +200,7 @@ class VideoService:
 
             # Update job status to completed - wrap this in its own try block
             try:
-                async with get_db() as db:
-                    db_session = db()
+                async with get_db() as db_session:
                     update_query = """
                     UPDATE job_add_reddit_comment_overlay
                     SET status = 'completed', output_path = :output_path
@@ -225,8 +221,7 @@ class VideoService:
             logger.error(f"Error processing job {job_code}: {str(e)}", exc_info=True)
             # Update job status to failed
             try:
-                async with get_db() as db:
-                    db_session = db()
+                async with get_db() as db_session:
                     await db_session.execute(
                         text("""
                         UPDATE job_add_reddit_comment_overlay
@@ -243,8 +238,7 @@ class VideoService:
         """Get the status of a video processing job."""
         try:
             # First get job details from database
-            async with get_db() as db:
-                db_session = db()
+            async with get_db() as db_session:
                 query = """
                 SELECT status, error_message, output_path
                 FROM job_add_reddit_comment_overlay
@@ -269,7 +263,6 @@ class VideoService:
                     async with get_redis() as redis_client:
                         key = f"video_progress:{job_code}"
                         progress_str = await redis_client.get(key)
-                        print(f"Progress from Redis {key}: {progress_str}")
 
                         if progress_str:
                             progress = float(progress_str)

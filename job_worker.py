@@ -46,8 +46,7 @@ async def start_video_worker():
                     logger.info(f"Received job code: {job_code} from queue")
 
                     # Get job details from database
-                    async with get_db() as db:
-                        db_session = db()
+                    async with get_db() as db_session:
                         query = """
                         SELECT * FROM job_add_reddit_comment_overlay
                         WHERE job_code = :job_code AND status = 'pending'
@@ -75,9 +74,7 @@ async def process_pending_jobs():
     logger.info("Checking for pending jobs...")
 
     try:
-        async with get_db() as db:
-            db_session = db()
-
+        async with get_db() as db_session:
             # Find jobs that are still pending
             result = await db_session.execute(
                 text("""
