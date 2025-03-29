@@ -8,6 +8,8 @@ services:
       - ./assets:/app/assets
       - ./app:/app/app
       - ./keys:/app/keys
+    env_file:
+      - .env
     environment:
       - PYTHONUNBUFFERED=1
     depends_on:
