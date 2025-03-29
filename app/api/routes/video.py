@@ -86,8 +86,8 @@ async def get_job_status(job_code: str, video_service: VideoService = Depends(ge
     return await video_service.get_job_status(job_code)
 
 
-@router.get("/supported-languages/", response_model=LanguagesResponse)
-def get_supported_languages() -> LanguagesResponse:
+@router.get("/languages/", response_model=LanguagesResponse)
+async def get_supported_languages() -> LanguagesResponse:
     """Get all supported languages for text-to-speech."""
     languages = [
         {"code": lang.value, "name": lang.name}
