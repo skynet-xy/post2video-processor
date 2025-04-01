@@ -52,7 +52,7 @@ def download_youtube_video(url, output_path=".", height=720, make_vertical=False
         'outtmpl': os.path.join(output_path, f'%(id)s-{resolution_tag}-{tag}-%(title,sanitize)s.%(ext)s'),
         'noplaylist': True,
         'restrictfilenames': True,
-        'trim_file_name': len(output_path) + 16,
+        'trim_file_name': len(output_path) + 32,
         'overwrites': False,
         'external_downloader': 'aria2c',  # Use aria2c for faster downloads
         'external_downloader_args': ['-x', '16', '-k', '1M']  # 16 connections, 1M chunk size
