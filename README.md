@@ -1,10 +1,6 @@
-# Reddit Comment Video Overlay Tool
+# FastAPI Video Trimming Service
 
-This tool allows you to overlay Reddit-style comments on existing videos. Each comment can include:
-- Custom avatar image
-- Username
-- Comment text
-- Specific start time and duration
+This service provides an API to trim videos using FastAPI.
 
 ## Installation
 
@@ -15,43 +11,52 @@ This tool allows you to overlay Reddit-style comments on existing videos. Each c
   pip install -r requirements.txt
 ```
 
-3. Download some font files (Arial and Arial Bold) and place them in the `fonts` directory:
-   - `fonts/arial.ttf`
-   - `fonts/arial_bold.ttf`
-
 ## Usage
 
-1. Place your video file in the project directory
-2. Modify the `create_video.py` script with your comments:
-
-```python
-comments = [
-    {
-        "username": "RedditUser123",
-        "text": "Your comment text here",
-        "avatar": "path/to/avatar.png",  # Optional
-        "start_time": 2.0,  # When to show the comment (seconds)
-        "duration": 4.0     # How long to show the comment (seconds)
-    },
-    # Add more comments as needed
-]
-```
-
-3. Run the script:
+1. Start the FastAPI server:
 
 ```bash
-  python create_video.py
+  uvicorn app.main:app --reload
 ```
 
-4. Find the output video in the location specified in the script
+2. Download a video file
+```shell
+python download_video.py
+```
+3. Send a POST request to the `/api/video/add-reddit-comments/` endpoint:
+Example:
 
-## Customization
-
-- Adjust the comment style by modifying the `create_reddit_comment` function
-- Change comment positioning by modifying the position values in `add_comments_to_video`
-
+```bash
+curl -X POST "http://localhost:8000/api/video/add-reddit-comments/" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "video_name": "ZkHKGWKq9mY-standard-6_Minutes_Minecraft_Shader_Parkour_Gamepla.mp4",
+    "comments": [
+      {
+        "text": "This is a sample comment",
+        "time_start": 1.5,
+        "time_end": 6.5
+      },
+      {
+        "text": "Another comment example",
+        "time_start": 8.0,
+        "time_end": 12.0
+      }
+    ]
+  }'
+```
+  
 ## Requirements
 
 - Python 3.6+
-- MoviePy
-- Pillow (PIL)
+- FastAPI
+- Uvicorn
+- Requests
+```
+
+## Project Structure
+
+- `app/main.py`: The main FastAPI application
+- `app/api/routes/video.py`: The video trimming endpoint
+- `test_fast_api.py`: Test script for the video trimming endpoint
+```

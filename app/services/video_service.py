@@ -7,7 +7,7 @@ import uuid
 from typing import List, Tuple, Dict, Any, Optional
 
 import yt_dlp as youtube_dl
-from fastapi import HTTPException, BackgroundTasks
+from fastapi import HTTPException
 from moviepy.editor import VideoFileClip
 from sqlalchemy import text
 
@@ -34,7 +34,6 @@ class VideoService:
             self,
             video_path: str,
             comments: List[Comment],
-            background_tasks: BackgroundTasks = None,
             voice_gender: str = "male",
             lang: str = "en-US",
             vid_len: Optional[int] = None,
@@ -48,7 +47,6 @@ class VideoService:
         Args:
             video_path: Path to the video file
             comments: List of Comment objects with text and timing info
-            background_tasks: BackgroundTasks object for running tasks asynchronously
             voice_gender: male or female
             lang: Language for text-to-speech
             vid_len: Length of the video in seconds

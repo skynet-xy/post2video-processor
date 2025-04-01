@@ -1,6 +1,6 @@
 # app/models/video.py
 from enum import Enum
-from typing import Optional, Any, List, Literal, Dict
+from typing import Optional, Any, List, Literal
 
 from pydantic import BaseModel, Field
 
@@ -11,21 +11,23 @@ class Gender(str, Enum):
     MALE = "male"
     FEMALE = "female"
 
+
 class Language(str, Enum):
-    US = "en-US"
-    FR = "fr-FR"
-    VN = "vi-VN"
+    English = "en-US"
+    France = "fr-FR"
+    Vietnamese = "vi-VN"
+
 
 class CommentRequest(BaseModel):
     # youtube_url: str = Field(default='', description="URL of YouTube video to download")
     video_name: str = Field(default='x3.mp4', description="Name of template video to use")
     comments: List[Comment] = Field(description="List of comments to overlay on the video")
     voice_gender: Optional[str] = Field(
-        default="male",
+        default=Gender.MALE,
         description="Voice to use for text-to-speech. Options: male, female"
     )
     lang: Optional[str] = Field(
-        default="en-US",
+        default=Language.English,
         description="Language for text-to-speech. Options: en-US, fr-FR, vi-VN"
     )
     theme: Optional[str] = Field(default="dark", description="Theme for the comment overlay. Options: dark, light")
@@ -42,6 +44,7 @@ class ResponseMessage(BaseModel):
     message: str
     data: Optional[Any] = None
 
+
 class JobStatusResponse(BaseModel):
     job_code: str
     success: bool
@@ -49,5 +52,11 @@ class JobStatusResponse(BaseModel):
     status: str = 'error'
     percentage: int = 0
 
+
+class LanguageModelResponse(BaseModel):
+    code: str
+    name: str
+
+
 class LanguagesResponse(BaseModel):
-    languages: List[Dict[str, str]]
+    languages: List[LanguageModelResponse]
