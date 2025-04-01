@@ -70,8 +70,6 @@ def main():
         print(f"Error: Directory '{root_directory}' not found")
         return
 
-    s3_client = get_s3_client(account_id, access_key_id, secret_access_key)
-
     # Process each file in the directory
     uploaded_count = 0
     skipped_count = 0
