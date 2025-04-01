@@ -35,7 +35,7 @@ def crop_to_vertical(video_path, output_path=None, target_ratio=9 / 16, audio_co
     cropped_clip = clip.crop(x1=x1, y1=0, width=new_width, height=original_height)
 
     # Write the cropped video
-    cropped_clip.write_videofile(output_path, codec="libx264", audio_codec=audio_codec)
+    cropped_clip.write_videofile(output_path, audio_codec=audio_codec, audio=False)
 
     # Close the clips to release resources
     clip.close()
