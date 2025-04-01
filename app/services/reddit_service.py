@@ -1,6 +1,7 @@
 import asyncpraw
 
 from app.api.dto.reddit_dto import Comment
+from app.core.config import settings
 
 
 class RedditService:
@@ -27,7 +28,7 @@ class RedditService:
             username = comment.author.name if comment.author else "[deleted]"
             text = comment.body
             # Use Reddit's default avatar as a placeholder
-            avatar = "/avatar_default_0.png"
+            avatar = settings.DEFAULT_AVATAR.__str__()
             comment_upvotes = comment.score
 
             comments.append(Comment(

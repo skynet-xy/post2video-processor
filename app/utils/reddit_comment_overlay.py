@@ -180,6 +180,7 @@ def add_comments_to_video(video, comments_data: List[Comment], lang, voice):
         # Check if this is a title or regular comment
         if hasattr(comment, 'is_title') and comment.is_title:
             # Create title card
+            print(comment.avatar)
             comment_img = _create_reddit_title(
                 title_text=comment.text,
                 avatar_path=comment.avatar,
@@ -187,6 +188,7 @@ def add_comments_to_video(video, comments_data: List[Comment], lang, voice):
             )
         else:
             # Create regular comment image
+            print(comment.avatar)
             comment_img = _create_reddit_comment(
                 username=comment.username,
                 comment_text=comment.text,

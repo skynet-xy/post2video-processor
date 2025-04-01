@@ -1,32 +1,21 @@
 # app/models/video.py
-from enum import Enum
 from typing import Optional, Any, List, Literal
 
 from pydantic import BaseModel, Field
 
 from app.api.dto.reddit_dto import Comment
-
-
-class Gender(str, Enum):
-    MALE = "male"
-    FEMALE = "female"
-
-
-class Language(str, Enum):
-    English = "en-US"
-    France = "fr-FR"
-    Vietnamese = "vi-VN"
+from app.enum.voice import Gender, Language
 
 
 class CommentRequest(BaseModel):
     # youtube_url: str = Field(default='', description="URL of YouTube video to download")
     video_name: str = Field(default='x3.mp4', description="Name of template video to use")
     comments: List[Comment] = Field(description="List of comments to overlay on the video")
-    voice_gender: Optional[str] = Field(
+    voice_gender: Optional[Gender] = Field(
         default=Gender.MALE,
         description="Voice to use for text-to-speech. Options: male, female"
     )
-    lang: Optional[str] = Field(
+    lang: Optional[Language] = Field(
         default=Language.English,
         description="Language for text-to-speech. Options: en-US, fr-FR, vi-VN"
     )
@@ -60,3 +49,14 @@ class LanguageModelResponse(BaseModel):
 
 class LanguagesResponse(BaseModel):
     languages: List[LanguageModelResponse]
+
+
+class VoiceModel(BaseModel):
+    name: str
+    code: str
+    language: Language
+    gender: Gender
+
+
+class VoicesResponse(BaseModel):
+    voices: List[VoiceModel]

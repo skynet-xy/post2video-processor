@@ -12,8 +12,10 @@ from moviepy.editor import VideoFileClip
 from sqlalchemy import text
 
 from app.api.dto.video_dto import Comment, ResponseMessage, JobStatusResponse
+from app.core.config import settings
 from app.db.redis import get_redis
 from app.db.session import get_db
+from app.enum.voice import Gender, Language
 from app.services.video.video_proglog import VideoProgLog
 from app.utils.comment_audio_generator import generate_comments_with_duration
 from app.utils.reddit_comment_overlay import add_comments_to_video, write_videofile
@@ -34,8 +36,8 @@ class VideoService:
             self,
             video_path: str,
             comments: List[Comment],
-            voice_gender: str = "male",
-            lang: str = "en-US",
+            voice_gender: Gender = Gender.FEMALE,
+            lang: Language = Language.English,
             vid_len: Optional[int] = None,
             ratio: Optional[str] = None,
             theme: Optional[str] = None,
@@ -65,7 +67,7 @@ class VideoService:
             video_name = os.path.basename(video_path)
 
             # Serialize comments to JSON
-            if lang != "en-US":
+            if lang != Language.English:
                 title = translate_text(title, lang)
                 logger.info(f"Translated title to {lang}")
 
@@ -82,7 +84,7 @@ class VideoService:
                 "vi-VN_male": "vi-VN-Chirp3-HD-Orus",
                 "vi-VN_female": "vi-VN-Chirp3-HD-Aoede",
             }
-            voice_id = voice_id_dict[f"{lang}_{voice_gender}"]
+            voice_id = voice_id_dict[f"{lang.value}_{voice_gender.value}"]
 
             video_info_dict = {
                 "job_code": job_code,
@@ -172,7 +174,7 @@ class VideoService:
                     text=post_title,
                     start_time=0.0,
                     duration=0.0,
-                    avatar="/avatar_default_0.png",
+                    avatar=settings.DEFAULT_AVATAR.__str__(),
                     is_title=True  # Add a flag to indicate this is a title
                 )
                 comments.insert(0, title_comment)
