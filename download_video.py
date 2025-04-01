@@ -44,15 +44,15 @@ def crop_to_vertical(video_path, output_path=None, target_ratio=9 / 16, audio_co
     return output_path
 
 
-def download_youtube_video(url, output_path=".", height=720, make_vertical=False):
+def download_youtube_video(url, output_path=".", height=720, make_vertical=False, tag: str = None):
     dl_format = f'bestvideo[height={height}]'
     resolution_tag = str(height) + "p"
     ydl_opts = {
         'format': dl_format,
-        'outtmpl': os.path.join(output_path, f'%(id)s-{resolution_tag}-%(title,sanitize)s.%(ext)s'),
+        'outtmpl': os.path.join(output_path, f'%(id)s-{resolution_tag}-{tag}-%(title,sanitize)s.%(ext)s'),
         'noplaylist': True,
         'restrictfilenames': True,
-        'trim_file_name': len(output_path) + 64,
+        'trim_file_name': len(output_path) + 16,
         'overwrites': False,
         'external_downloader': 'aria2c',  # Use aria2c for faster downloads
         'external_downloader_args': ['-x', '16', '-k', '1M']  # 16 connections, 1M chunk size
@@ -68,9 +68,16 @@ def download_youtube_video(url, output_path=".", height=720, make_vertical=False
 
 
 if __name__ == "__main__":
-    youtube_urls = {"https://www.youtube.com/watch?v=ZkHKGWKq9mY", "https://www.youtube.com/watch?v=NX-i0IWl3yg"}
-    for url in youtube_urls:
-        title, _ = download_youtube_video(url, output_path="assets/video_templates", height=720, make_vertical=True)
+    minecraft_youtube_urls = {
+        "https://www.youtube.com/watch?v=ZkHKGWKq9mY",
+        "https://www.youtube.com/watch?v=NX-i0IWl3yg",
+        "https://www.youtube.com/watch?v=AsetdKZN11o",
+        "https://www.youtube.com/watch?v=-Gm27KL-JKI",
+        "https://www.youtube.com/watch?v=CiidOooHG7U",
+        "https://www.youtube.com/watch?v=cz_y5nCzGMw",
+    }
+    for url in minecraft_youtube_urls:
+        title, _ = download_youtube_video(url, output_path="assets/video_templates", height=720, make_vertical=True, tag="minecraft")
         print(title)
-        title, _ = download_youtube_video(url, output_path="assets/video_templates", height=1080, make_vertical=True)
+        title, _ = download_youtube_video(url, output_path="assets/video_templates", height=1080, make_vertical=True, tag="minecraft")
         print(title)
