@@ -57,8 +57,8 @@ def upload_video_to_cloudflare(file_path, account_id, access_key_id, secret_acce
 
 
 def main():
-    # Directory containing videos
-    videos_directory = "./assets/video_templates"  # Update this path
+    # Root directory for recursive upload
+    root_directory = "./assets"  # Changed from "./assets/video_templates"
 
     # Credentials from environment variables
     account_id = os.environ.get('CLOUDFLARE_ACCOUNT_ID', '')
@@ -66,8 +66,8 @@ def main():
     secret_access_key = os.environ.get('CLOUDFLARE_SECRET_ACCESS_KEY', '')
     bucket_name = os.environ.get('CLOUDFLARE_BUCKET_NAME', '')
 
-    if not os.path.isdir(videos_directory):
-        print(f"Error: Directory '{videos_directory}' not found")
+    if not os.path.isdir(root_directory):
+        print(f"Error: Directory '{root_directory}' not found")
         return
 
     s3_client = get_s3_client(account_id, access_key_id, secret_access_key)
@@ -77,29 +77,38 @@ def main():
     skipped_count = 0
     failed_count = 0
 
-    for filename in os.listdir(videos_directory):
-        file_path = os.path.join(videos_directory, filename)
+    # Walk through all subdirectories
+    for dirpath, _, filenames in os.walk(root_directory):
+        for filename in filenames:
+            file_path = os.path.join(dirpath, filename)
 
-        # Skip directories and non-video files
-        if os.path.isdir(file_path) or not is_video_file(file_path):
-            continue
+            # Skip non-video files
+            # if not is_video_file(file_path):
+            #     continue
 
-        print(f"Processing: {filename}")
-        result = upload_video_to_cloudflare(file_path=file_path, account_id=account_id, access_key_id=access_key_id,
-            secret_access_key=secret_access_key, bucket_name=bucket_name, object_name=filename)
+            # Create object name based on relative path
+            relative_path = os.path.relpath(file_path, root_directory)
+            object_name = relative_path.replace('\\', '/')  # Ensure proper path format
 
-        if result.get("skipped"):
-            print(f"Skipped '{filename}': Already exists in bucket")
-            skipped_count += 1
-        elif result["success"]:
-            print(f"Uploaded '{filename}' successfully: {result['public_url']}")
-            uploaded_count += 1
-        else:
-            print(f"Failed to upload '{filename}': {result['error']}")
-            failed_count += 1
+            print(f"Processing: {relative_path}")
+            result = upload_video_to_cloudflare(file_path=file_path, account_id=account_id, access_key_id=access_key_id,
+                secret_access_key=secret_access_key, bucket_name=bucket_name, object_name=object_name)
+
+            if result.get("skipped"):
+                print(f"Skipped '{relative_path}': Already exists in bucket")
+                skipped_count += 1
+            elif result["success"]:
+                print(f"Uploaded '{relative_path}' successfully: {result['public_url']}")
+                uploaded_count += 1
+            else:
+                print(f"Failed to upload '{relative_path}': {result['error']}")
+                failed_count += 1
 
     print(f"\nSummary: {uploaded_count} uploaded, {skipped_count} skipped, {failed_count} failed")
 
+
+if __name__ == "__main__":
+    main()
 
 if __name__ == "__main__":
     main()
