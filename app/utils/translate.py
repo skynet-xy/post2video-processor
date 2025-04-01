@@ -1,9 +1,12 @@
-import os
-from typing import List
-from logging import getLogger
 import html
+import os
+from logging import getLogger
+from typing import List
+
 # Import the Comment class from your models
 from app.api.dto.video_dto import Comment
+from app.core.config import settings
+
 # Set up logger
 logger = getLogger(__name__)
 
@@ -11,7 +14,7 @@ from google.cloud import translate_v2 as translate
 
 def translate_comments(comments: List[Comment],
                        target_language: str,
-                       credentials_path="./keys/capable-shape-452021-u9-06c66c66092c.json") -> List[Comment]:
+                       credentials_path=settings.GOOGLE_CLOUD_CREDENTIALS_PATH.__str__()) -> List[Comment]:
     """
     Translate comments from English to target language
 
@@ -74,7 +77,7 @@ def translate_comments(comments: List[Comment],
 
 def translate_text(text: str,
                    target_language: str,
-                   credentials_path="./keys/capable-shape-452021-u9-06c66c66092c.json") -> str:
+                   credentials_path=settings.GOOGLE_CLOUD_CREDENTIALS_PATH) -> str:
     """
     Translate a single text from English to target language
 

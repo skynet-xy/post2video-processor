@@ -32,6 +32,9 @@ class Settings(BaseSettings):
     DEFAULT_AVATAR: Path = ASSETS_DIR / "defaults/default_avatar.png"
     VIDEO_TEMPLATES_DIR: Path = ASSETS_DIR / "video_templates"
 
+    # Google Cloud settings
+    GOOGLE_CLOUD_CREDENTIALS_PATH: Path = BASE_DIR / "keys/capable-shape-452021-u9-06c66c66092c.json"
+
     # Reddit settings
     REDDIT_CLIENT_ID: str = "ZdHLafxpZo6OtKIIn0uPOA"
     REDDIT_CLIENT_SECRET: str = "PZRwrx8xwktG1-LZIGrpYZGl2oqNpg"

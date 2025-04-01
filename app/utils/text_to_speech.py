@@ -10,7 +10,7 @@ from app.core.config import settings
 
 def generate_audio_from_text(text, language_code="en-US", voice_name="en-US-Standard-D",
                              speaking_rate=1.0, pitch=0.0,
-                             credentials_path="./keys/capable-shape-452021-u9-06c66c66092c.json",
+                             credentials_path=settings.GOOGLE_CLOUD_CREDENTIALS_PATH.__str__(),
                              output_dir=None):
     """
     Convert text to speech using Google Cloud TTS API
