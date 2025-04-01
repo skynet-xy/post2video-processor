@@ -55,7 +55,8 @@ def download_youtube_video(url, output_path=".", height=720, make_vertical=False
         'trim_file_name': len(output_path) + 32,
         'overwrites': False,
         'external_downloader': 'aria2c',  # Use aria2c for faster downloads
-        'external_downloader_args': ['-x', '16', '-k', '1M']  # 16 connections, 1M chunk size
+        'external_downloader_args': ['-x', '16', '-k', '1M'],  # 16 connections, 1M chunk size
+        'cookiefile': 'generated/cookies.txt' if os.path.exists('generated/cookies.txt') else None,
     }
 
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
