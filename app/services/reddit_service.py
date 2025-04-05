@@ -26,12 +26,12 @@ class RedditService:
             # Extract username and comment text
             username = comment.author.name if comment.author else "[deleted]"
             text = comment.body
-            comment_upvotes = comment.score
+            comment_upvote = comment.score
 
             comments.append(Comment(
                 username=username,
                 text=text,
-                upvotes=comment_upvotes
+                upvote=comment_upvote
             ))
 
         await reddit.close()  # Important to close the connection when done

@@ -6,8 +6,8 @@ from pydantic import BaseModel, HttpUrl, Field
 class Comment(BaseModel):
     username: str
     text: str
-    avatar: Optional[str] = Field(None, description="URL to the user's avatar")
-    upvotes: Optional[int] = Field(0, description="Number of upvotes for the comment")
+    avatar: Optional[str] = ''
+    upvote: Optional[int] = Field(0, description="Number of upvote for the comment")
     start_time: float = Field(0, exclude=True)
     duration: Optional[float] = Field(0.0, exclude=True)
     is_title: Optional[bool] = Field(False, exclude=True)
