@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from app.api.dto.video_dto import LanguagesResponse, LanguageModelResponse, VoicesResponse, VoiceModel
 from app.enum.voice import Gender, Language
 
-router = APIRouter(prefix="/voice", tags=["Voices Operations"])
+router = APIRouter(prefix="/option", tags=["Option Operations"])
 
 
 @router.get("/languages/", response_model=LanguagesResponse)

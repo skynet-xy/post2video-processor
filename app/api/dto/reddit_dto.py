@@ -1,10 +1,12 @@
-from pydantic import BaseModel, HttpUrl, Field
 from typing import Optional
+
+from pydantic import BaseModel, HttpUrl, Field
+
 
 class Comment(BaseModel):
     username: str
     text: str
-    avatar: str
+    avatar: Optional[str] = Field(None, description="URL to the user's avatar")
     upvotes: Optional[int] = Field(0, description="Number of upvotes for the comment")
     start_time: float = Field(0, exclude=True)
     duration: Optional[float] = Field(0.0, exclude=True)
